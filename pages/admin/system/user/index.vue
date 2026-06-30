@@ -80,8 +80,9 @@
     <el-dialog
       v-model="isDialogVisible"
       :title="isEditing ? t('users.dialog.editTitle') : t('users.dialog.createTitle')"
-      width="560px"
+      width="700px"
       destroy-on-close
+      draggable
     >
       <el-form
         ref="userFormRef"
