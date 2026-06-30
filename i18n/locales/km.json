@@ -1,0 +1,116 @@
+{
+  "app": {
+    "name": "កម្មវិធីគ្រប់គ្រងការបញ្ជាទិញ",
+    "admin": "ផ្ទាំងគ្រប់គ្រង",
+    "subtitle": "កន្លែងធ្វើការប្រតិបត្តិការ"
+  },
+  "menu": {
+    "dashboard": "ផ្ទាំងសង្ខេប",
+    "users": "អ្នកប្រើប្រាស់",
+    "roles": "តួនាទី"
+  },
+  "common": {
+    "search": "ស្វែងរក",
+    "status": "ស្ថានភាព",
+    "date": "កាលបរិច្ឆេទ",
+    "actions": "សកម្មភាព",
+    "cancel": "បោះបង់",
+    "yes": "បាទ/ចាស",
+    "no": "ទេ",
+    "errors": {
+      "generic": "មានបញ្ហាកើតឡើង។ សូមព្យាយាមម្តងទៀត។"
+    }
+  },
+  "dashboard": {
+    "totalOrders": "ការបញ្ជាទិញសរុប",
+    "totalOrdersCaption": "ការបញ្ជាទិញក្នុងខែនេះ",
+    "activeUsers": "អ្នកប្រើសកម្ម",
+    "activeUsersCaption": "អ្នកប្រើដែលមានសកម្មភាពថ្មីៗ",
+    "revenue": "ចំណូល",
+    "revenueCaption": "ការលក់ដែលបានបញ្ជាក់ក្នុងខែនេះ",
+    "pendingTasks": "ការងាររង់ចាំ",
+    "pendingTasksCaption": "ធាតុដែលរង់ចាំដំណើរការ",
+    "recentOrders": "ការបញ្ជាទិញថ្មីៗ",
+    "recentOrdersHelp": "សកម្មភាពបញ្ជាទិញចុងក្រោយក្នុងប្រព័ន្ធ"
+  },
+  "orders": {
+    "code": "លេខកូដបញ្ជាទិញ",
+    "customer": "អតិថិជន",
+    "total": "សរុប",
+    "status": {
+      "completed": "បានបញ្ចប់",
+      "pending": "រង់ចាំ",
+      "processing": "កំពុងដំណើរការ"
+    }
+  },
+  "users": {
+    "title": "គ្រប់គ្រងអ្នកប្រើប្រាស់",
+    "description": "គ្រប់គ្រងសមាជិកក្រុម និងសិទ្ធិចូលប្រើ។",
+    "name": "ឈ្មោះ",
+    "username": "ឈ្មោះអ្នកប្រើ",
+    "email": "អ៊ីមែល",
+    "role": "តួនាទី",
+    "roles": "តួនាទី",
+    "emptyRoles": "មិនមានតួនាទី",
+    "password": "ពាក្យសម្ងាត់",
+    "passwordOptional": "ពាក្យសម្ងាត់ (ទុកទទេ ប្រសិនបើមិនចង់ផ្លាស់ប្តូរ)",
+    "confirmPassword": "បញ្ជាក់ពាក្យសម្ងាត់",
+    "isSuperUser": "អ្នកប្រើកម្រិតខ្ពស់",
+    "isActive": "សកម្ម",
+    "lastLogin": "ចូលប្រើចុងក្រោយ",
+    "actions": {
+      "new": "អ្នកប្រើថ្មី",
+      "create": "បង្កើតអ្នកប្រើ",
+      "edit": "កែប្រែអ្នកប្រើ",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបអ្នកប្រើ"
+    },
+    "dialog": {
+      "createTitle": "អ្នកប្រើថ្មី",
+      "editTitle": "កែប្រែអ្នកប្រើ"
+    },
+    "placeholders": {
+      "username": "admin",
+      "email": "admin{'@'}example.com",
+      "password": "secret123",
+      "confirmPassword": "បញ្ជាក់ពាក្យសម្ងាត់",
+      "roles": "ជ្រើសរើសតួនាទី"
+    },
+    "validation": {
+      "usernameRequired": "ត្រូវការឈ្មោះអ្នកប្រើ",
+      "emailRequired": "ត្រូវការអ៊ីមែល",
+      "emailInvalid": "សូមបញ្ចូលអាសយដ្ឋានអ៊ីមែលត្រឹមត្រូវ",
+      "passwordRequired": "ត្រូវការពាក្យសម្ងាត់",
+      "confirmPasswordRequired": "ត្រូវការបញ្ជាក់ពាក្យសម្ងាត់",
+      "passwordMin": "ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ",
+      "passwordsDoNotMatch": "ពាក្យសម្ងាត់មិនដូចគ្នា",
+      "rolesRequired": "ត្រូវការតួនាទីយ៉ាងតិចមួយ"
+    },
+    "messages": {
+      "created": "បានបង្កើតអ្នកប្រើ",
+      "updated": "បានកែប្រែអ្នកប្រើ",
+      "deleted": "បានលុបអ្នកប្រើ",
+      "missingId": "មិនអាចលុបអ្នកប្រើនេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបអ្នកប្រើ",
+      "message": "លុបអ្នកប្រើ \"{username}\"?"
+    },
+    "status": {
+      "active": "សកម្ម",
+      "inactive": "អសកម្ម"
+    }
+  },
+  "roles": {
+    "title": "គ្រប់គ្រងតួនាទី",
+    "description": "កំណត់សិទ្ធិតាមតួនាទី។",
+    "name": "តួនាទី",
+    "roleDescription": "ការពិពណ៌នា",
+    "users": "អ្នកប្រើ",
+    "permissions": "សិទ្ធិ",
+    "status": {
+      "enabled": "បើក",
+      "disabled": "បិទ"
+    }
+  }
+}

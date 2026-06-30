@@ -1,0 +1,116 @@
+{
+  "app": {
+    "name": "Order Manager",
+    "admin": "Admin Console",
+    "subtitle": "Operations workspace"
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "roles": "Roles"
+  },
+  "common": {
+    "search": "Search",
+    "status": "Status",
+    "date": "Date",
+    "actions": "Actions",
+    "cancel": "Cancel",
+    "yes": "Yes",
+    "no": "No",
+    "errors": {
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "dashboard": {
+    "totalOrders": "Total orders",
+    "totalOrdersCaption": "Orders recorded this month",
+    "activeUsers": "Active users",
+    "activeUsersCaption": "Users with recent activity",
+    "revenue": "Revenue",
+    "revenueCaption": "Confirmed sales this month",
+    "pendingTasks": "Pending tasks",
+    "pendingTasksCaption": "Items waiting for action",
+    "recentOrders": "Recent orders",
+    "recentOrdersHelp": "Latest order activity across the system"
+  },
+  "orders": {
+    "code": "Order code",
+    "customer": "Customer",
+    "total": "Total",
+    "status": {
+      "completed": "Completed",
+      "pending": "Pending",
+      "processing": "Processing"
+    }
+  },
+  "users": {
+    "title": "User management",
+    "description": "Manage team members and account access.",
+    "name": "Name",
+    "username": "Username",
+    "email": "Email",
+    "role": "Role",
+    "roles": "Roles",
+    "emptyRoles": "No roles",
+    "password": "Password",
+    "passwordOptional": "Password (leave blank to keep current)",
+    "confirmPassword": "Confirm password",
+    "isSuperUser": "Super user",
+    "isActive": "Active",
+    "lastLogin": "Last login",
+    "actions": {
+      "new": "New user",
+      "create": "Create user",
+      "edit": "Edit user",
+      "save": "Save changes",
+      "delete": "Delete user"
+    },
+    "dialog": {
+      "createTitle": "New user",
+      "editTitle": "Edit user"
+    },
+    "placeholders": {
+      "username": "admin",
+      "email": "admin{'@'}example.com",
+      "password": "secret123",
+      "confirmPassword": "Confirm password",
+      "roles": "Select roles"
+    },
+    "validation": {
+      "usernameRequired": "Username is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email address",
+      "passwordRequired": "Password is required",
+      "confirmPasswordRequired": "Confirm password is required",
+      "passwordMin": "Password must be at least 6 characters",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "rolesRequired": "At least one role is required"
+    },
+    "messages": {
+      "created": "User created",
+      "updated": "User updated",
+      "deleted": "User deleted",
+      "missingId": "This user cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete user",
+      "message": "Delete user \"{username}\"?"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  },
+  "roles": {
+    "title": "Role management",
+    "description": "Control permissions by role.",
+    "name": "Role",
+    "roleDescription": "Description",
+    "users": "Users",
+    "permissions": "Permissions",
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    }
+  }
+}
