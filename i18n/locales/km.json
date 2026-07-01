@@ -108,6 +108,38 @@
     "roleDescription": "ការពិពណ៌នា",
     "users": "អ្នកប្រើ",
     "permissions": "សិទ្ធិ",
+    "emptyPermissions": "មិនមានសិទ្ធិ",
+    "emptyPermissionOptions": "មិនមានជម្រើសសិទ្ធិ។",
+    "loadingPermissions": "កំពុងផ្ទុកសិទ្ធិ...",
+    "actions": {
+      "new": "តួនាទីថ្មី",
+      "create": "បង្កើតតួនាទី",
+      "edit": "កែប្រែតួនាទី",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបតួនាទី"
+    },
+    "dialog": {
+      "createTitle": "តួនាទីថ្មី",
+      "editTitle": "កែប្រែតួនាទី"
+    },
+    "placeholders": {
+      "name": "admin",
+      "permissions": "ជ្រើសរើសសិទ្ធិ"
+    },
+    "validation": {
+      "nameRequired": "ត្រូវការឈ្មោះតួនាទី",
+      "permissionsRequired": "ត្រូវការសិទ្ធិយ៉ាងតិចមួយ"
+    },
+    "messages": {
+      "created": "បានបង្កើតតួនាទី",
+      "updated": "បានកែប្រែតួនាទី",
+      "deleted": "បានលុបតួនាទី",
+      "missingId": "មិនអាចលុបតួនាទីនេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបតួនាទី",
+      "message": "លុបតួនាទី \"{name}\"?"
+    },
     "status": {
       "enabled": "បើក",
       "disabled": "បិទ"

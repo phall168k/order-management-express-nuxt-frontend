@@ -21,7 +21,7 @@
           class="admin-menu border-r-0"
           router
         >
-          <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
+          <el-menu-item v-for="item in visibleMenuItems" :key="item.path" :index="item.path">
             <Icon :name="item.icon" class="h-5 w-5" />
             <template #title>{{ t(item.label) }}</template>
           </el-menu-item>
@@ -49,7 +49,12 @@
                 :value="localeItem.code"
               />
             </el-select>
-            <el-avatar :size="34" class="bg-emerald-600">A</el-avatar>
+            <el-avatar :size="34" class="bg-emerald-600">{{ userInitial }}</el-avatar>
+            <el-tooltip content="Logout" placement="bottom">
+              <el-button circle text type="danger" @click="logout">
+                <Icon name="lucide:log-out" class="h-5 w-5" />
+              </el-button>
+            </el-tooltip>
           </div>
         </el-header>
 
@@ -64,19 +69,28 @@
 <script setup lang="ts">
 const route = useRoute()
 const { t, locale, locales, setLocale } = useI18n()
+const { user, hasAnyPermission, clearAuth } = useAuth()
 
 const isCollapsed = ref(false)
 const selectedLocale = ref(locale.value)
 
 const menuItems = [
   { path: '/admin/dashboard', label: 'menu.dashboard', icon: 'lucide:layout-dashboard' },
-  { path: '/admin/system/user', label: 'menu.users', icon: 'lucide:users' },
-  { path: '/admin/system/role', label: 'menu.roles', icon: 'lucide:shield-check' },
+  { path: '/admin/system/user', label: 'menu.users', icon: 'lucide:users', permission: 'user.read' },
+  { path: '/admin/system/role', label: 'menu.roles', icon: 'lucide:shield-check', permission: 'role.read' },
 ]
+
+const visibleMenuItems = computed(() => {
+  return menuItems.filter((item) => hasAnyPermission(item.permission))
+})
 
 const currentTitle = computed(() => {
   const activeItem = menuItems.find((item) => route.path.startsWith(item.path))
   return activeItem ? t(activeItem.label) : t('app.admin')
+})
+
+const userInitial = computed(() => {
+  return (user.value?.username || user.value?.email || 'A').charAt(0).toUpperCase()
 })
 
 watch(locale, (value) => {
@@ -89,6 +103,11 @@ const toggleSidebar = () => {
 
 const changeLocale = (value: string) => {
   setLocale(value)
+}
+
+const logout = async () => {
+  clearAuth()
+  await navigateTo('/auth/login')
 }
 </script>
 

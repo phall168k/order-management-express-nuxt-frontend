@@ -108,6 +108,38 @@
     "roleDescription": "Description",
     "users": "Users",
     "permissions": "Permissions",
+    "emptyPermissions": "No permissions",
+    "emptyPermissionOptions": "No permission options available.",
+    "loadingPermissions": "Loading permissions...",
+    "actions": {
+      "new": "New role",
+      "create": "Create role",
+      "edit": "Edit role",
+      "save": "Save changes",
+      "delete": "Delete role"
+    },
+    "dialog": {
+      "createTitle": "New role",
+      "editTitle": "Edit role"
+    },
+    "placeholders": {
+      "name": "admin",
+      "permissions": "Select permissions"
+    },
+    "validation": {
+      "nameRequired": "Role name is required",
+      "permissionsRequired": "At least one permission is required"
+    },
+    "messages": {
+      "created": "Role created",
+      "updated": "Role updated",
+      "deleted": "Role deleted",
+      "missingId": "This role cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete role",
+      "message": "Delete role \"{name}\"?"
+    },
     "status": {
       "enabled": "Enabled",
       "disabled": "Disabled"

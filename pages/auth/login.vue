@@ -75,6 +75,19 @@ type LoginResponse = {
   accessToken?: string
   access_token?: string
   data?: {
+    _id?: string
+    id?: string
+    username?: string
+    email?: string
+    isActive?: boolean
+    isSuperUser?: boolean
+    roles?: Array<{
+      _id?: string
+      id?: string
+      name?: string
+    }>
+    permission?: string[]
+    permissions?: string[]
     token?: string
     accessToken?: string
     access_token?: string
@@ -83,17 +96,14 @@ type LoginResponse = {
 }
 
 const config = useRuntimeConfig()
-const authToken = useCookie<string | null>('auth_token', {
-  maxAge: 60 * 60 * 24 * 7,
-  sameSite: 'lax'
-})
+const { setAuth } = useAuth()
 
 const loginFormRef = ref<FormInstance>()
 const isSubmitting = ref(false)
 
 const form = reactive({
-  usernameOrEmail: '',
-  password: ''
+  usernameOrEmail: 'admin@example.com',
+  password: 'Password@123'
 })
 
 const rules: FormRules<typeof form> = {
@@ -106,15 +116,6 @@ const rules: FormRules<typeof form> = {
 }
 
 const apiBaseUrl = computed(() => String(config.public.apiBaseUrl).replace(/\/$/, ''))
-
-const getTokenFromResponse = (response: LoginResponse) => {
-  return response.token
-    || response.accessToken
-    || response.access_token
-    || response.data?.token
-    || response.data?.accessToken
-    || response.data?.access_token
-}
 
 const getErrorMessage = (error: unknown) => {
   if (typeof error === 'object' && error !== null && 'data' in error) {
@@ -142,14 +143,11 @@ const submitLogin = async () => {
       }
     })
 
-    const token = getTokenFromResponse(response)
-
-    if (!token) {
+    if (!setAuth(response)) {
       ElMessage.error('Login succeeded but no access token was returned.')
       return
     }
 
-    authToken.value = token
     ElMessage.success(response.message || 'Login successful')
     await navigateTo('/admin/dashboard')
   } catch (error) {

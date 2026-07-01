@@ -12,7 +12,7 @@
             <Icon name="lucide:search" class="h-4 w-4 text-slate-400" />
           </template>
         </el-input>
-        <el-button type="primary" @click="openCreateDialog">
+        <el-button v-if="canCreateUser" type="primary" @click="openCreateDialog">
           <Icon name="lucide:plus" class="mr-2 h-4 w-4" />
           {{ t('users.actions.new') }}
         </el-button>
@@ -47,15 +47,15 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column fixed="right" :label="t('common.actions')" width="130">
+        <el-table-column v-if="canUpdateUser || canDeleteUser" fixed="right" :label="t('common.actions')" width="130">
           <template #default="{ row }">
             <div class="flex items-center gap-1">
-              <el-tooltip :content="t('users.actions.edit')" placement="top">
+              <el-tooltip v-if="canUpdateUser" :content="t('users.actions.edit')" placement="top">
                 <el-button circle text @click="openEditDialog(row)">
                   <Icon name="lucide:pencil" class="h-4 w-4" />
                 </el-button>
               </el-tooltip>
-              <el-tooltip :content="t('users.actions.delete')" placement="top">
+              <el-tooltip v-if="canDeleteUser" :content="t('users.actions.delete')" placement="top">
                 <el-button circle text type="danger" @click="deleteUser(row)">
                   <Icon name="lucide:trash-2" class="h-4 w-4" />
                 </el-button>
@@ -171,7 +171,8 @@ import type { FormInstance, FormRules } from 'element-plus'
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth'
+  middleware: 'auth',
+  permission: 'user.read'
 })
 
 type ApiUser = {
@@ -235,6 +236,7 @@ type RoleOptionsResponse = RawRoleOption[] | {
 const { t } = useI18n()
 const config = useRuntimeConfig()
 const authToken = useCookie<string | null>('auth_token')
+const { hasPermission } = useAuth()
 
 const apiBaseUrl = computed(() => String(config.public.apiBaseUrl).replace(/\/$/, ''))
 const usersEndpoint = computed(() => `${apiBaseUrl.value}/system/users`)
@@ -263,6 +265,9 @@ const form = reactive<UserForm>({
 })
 
 const isEditing = computed(() => Boolean(editingUserId.value))
+const canCreateUser = computed(() => hasPermission('user.create'))
+const canUpdateUser = computed(() => hasPermission('user.update'))
+const canDeleteUser = computed(() => hasPermission('user.delete'))
 
 const validatePassword = (_rule: unknown, value: string, callback: (error?: Error) => void) => {
   if (!isEditing.value && !value) {
@@ -447,11 +452,15 @@ const refreshUsers = async () => {
 }
 
 const openCreateDialog = () => {
+  if (!canCreateUser.value) return
+
   resetForm()
   isDialogVisible.value = true
 }
 
 const openEditDialog = (user: ApiUser) => {
+  if (!canUpdateUser.value) return
+
   editingUserId.value = getUserId(user)
   Object.assign(form, {
     username: user.username,
@@ -501,6 +510,8 @@ const refreshRoleOptions = async () => {
 
 const submitUser = async () => {
   if (!userFormRef.value) return
+  if (isEditing.value && !canUpdateUser.value) return
+  if (!isEditing.value && !canCreateUser.value) return
 
   const isValid = await userFormRef.value.validate().catch(() => false)
   if (!isValid) return
@@ -528,6 +539,8 @@ const submitUser = async () => {
 }
 
 const deleteUser = async (user: ApiUser) => {
+  if (!canDeleteUser.value) return
+
   const userId = getUserId(user)
   if (!userId) {
     ElMessage.error(t('users.messages.missingId'))
