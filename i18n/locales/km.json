@@ -8,6 +8,7 @@
     "dashboard": "ផ្ទាំងសង្ខេប",
     "categories": "ប្រភេទទំនិញ",
     "products": "ទំនិញ",
+    "stocks": "ស្តុក",
     "userProfiles": "ប្រវត្តិរូបអ្នកប្រើ",
     "users": "អ្នកប្រើប្រាស់",
     "roles": "តួនាទី"
@@ -302,6 +303,53 @@
     "confirmDelete": {
       "title": "លុបទំនិញ",
       "message": "លុបទំនិញ \"{code}\"?"
+    }
+  },
+  "stocks": {
+    "title": "គ្រប់គ្រងស្តុក",
+    "description": "តាមដានចំនួនស្តុកទំនិញ និងស្ថានភាពស្តុក។",
+    "product": "ទំនិញ",
+    "minStock": "ស្តុកអប្បបរមា",
+    "stockIn": "ស្តុកចូល",
+    "stockOut": "ស្តុកចេញ",
+    "stockAdjustment": "កែតម្រូវ",
+    "stockOnHand": "ស្តុកនៅក្នុងដៃ",
+    "isStock": "តាមដានស្តុក",
+    "note": "ចំណាំ",
+    "actions": {
+      "new": "ស្តុកថ្មី",
+      "create": "បង្កើតស្តុក",
+      "edit": "កែប្រែស្តុក",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបស្តុក"
+    },
+    "dialog": {
+      "createTitle": "ស្តុកថ្មី",
+      "editTitle": "កែប្រែស្តុក"
+    },
+    "placeholders": {
+      "product": "ជ្រើសរើសទំនិញ",
+      "note": "Initial stock entry"
+    },
+    "validation": {
+      "productRequired": "ត្រូវការទំនិញ",
+      "minStockRequired": "ត្រូវការស្តុកអប្បបរមា",
+      "minStockMin": "ស្តុកអប្បបរមាមិនអាចតិចជាងសូន្យ",
+      "stockInRequired": "ត្រូវការស្តុកចូល",
+      "stockInMin": "ស្តុកចូលមិនអាចតិចជាងសូន្យ",
+      "stockOutRequired": "ត្រូវការស្តុកចេញ",
+      "stockOutMin": "ស្តុកចេញមិនអាចតិចជាងសូន្យ",
+      "stockAdjustmentRequired": "ត្រូវការការកែតម្រូវស្តុក"
+    },
+    "messages": {
+      "created": "បានបង្កើតស្តុក",
+      "updated": "បានកែប្រែស្តុក",
+      "deleted": "បានលុបស្តុក",
+      "missingId": "មិនអាចលុបស្តុកនេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបស្តុក",
+      "message": "លុបស្តុកសម្រាប់ \"{product}\"?"
     }
   }
 }

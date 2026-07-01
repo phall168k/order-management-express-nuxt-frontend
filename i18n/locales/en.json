@@ -8,6 +8,7 @@
     "dashboard": "Dashboard",
     "categories": "Categories",
     "products": "Products",
+    "stocks": "Stock",
     "userProfiles": "User profiles",
     "users": "Users",
     "roles": "Roles"
@@ -302,6 +303,53 @@
     "confirmDelete": {
       "title": "Delete product",
       "message": "Delete product \"{code}\"?"
+    }
+  },
+  "stocks": {
+    "title": "Stock management",
+    "description": "Track product stock quantities and stock availability.",
+    "product": "Product",
+    "minStock": "Minimum stock",
+    "stockIn": "Stock in",
+    "stockOut": "Stock out",
+    "stockAdjustment": "Adjustment",
+    "stockOnHand": "Stock on hand",
+    "isStock": "Track stock",
+    "note": "Note",
+    "actions": {
+      "new": "New stock",
+      "create": "Create stock",
+      "edit": "Edit stock",
+      "save": "Save changes",
+      "delete": "Delete stock"
+    },
+    "dialog": {
+      "createTitle": "New stock",
+      "editTitle": "Edit stock"
+    },
+    "placeholders": {
+      "product": "Select product",
+      "note": "Initial stock entry"
+    },
+    "validation": {
+      "productRequired": "Product is required",
+      "minStockRequired": "Minimum stock is required",
+      "minStockMin": "Minimum stock cannot be negative",
+      "stockInRequired": "Stock in is required",
+      "stockInMin": "Stock in cannot be negative",
+      "stockOutRequired": "Stock out is required",
+      "stockOutMin": "Stock out cannot be negative",
+      "stockAdjustmentRequired": "Stock adjustment is required"
+    },
+    "messages": {
+      "created": "Stock created",
+      "updated": "Stock updated",
+      "deleted": "Stock deleted",
+      "missingId": "This stock item cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete stock",
+      "message": "Delete stock entry for \"{product}\"?"
     }
   }
 }
