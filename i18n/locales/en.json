@@ -9,6 +9,7 @@
     "categories": "Categories",
     "products": "Products",
     "stocks": "Stock",
+    "stockIns": "Stock in",
     "userProfiles": "User profiles",
     "users": "Users",
     "roles": "Roles"
@@ -350,6 +351,53 @@
     "confirmDelete": {
       "title": "Delete stock",
       "message": "Delete stock entry for \"{product}\"?"
+    }
+  },
+  "stockIns": {
+    "title": "Stock in",
+    "description": "Record incoming stock quantities by product and date.",
+    "stockInDate": "Stock in date",
+    "no": "No.",
+    "product": "Product",
+    "quantity": "Quantity",
+    "note": "Note",
+    "itemTitle": "Item {number}",
+    "itemCount": "{count} items",
+    "items": "Items",
+    "actions": {
+      "new": "New stock in",
+      "create": "Create stock in",
+      "edit": "Edit stock in",
+      "save": "Save changes",
+      "delete": "Delete stock in",
+      "addItem": "Add item",
+      "removeItem": "Remove item"
+    },
+    "dialog": {
+      "createTitle": "New stock in",
+      "editTitle": "Edit stock in"
+    },
+    "placeholders": {
+      "stockInDate": "2026-07-01",
+      "product": "Select product",
+      "note": "Initial stock in"
+    },
+    "validation": {
+      "stockInDateRequired": "Stock in date is required",
+      "productRequired": "Product is required",
+      "productDuplicate": "This product is already selected in another item",
+      "quantityRequired": "Quantity is required",
+      "quantityMin": "Quantity must be at least 1"
+    },
+    "messages": {
+      "created": "Stock in created",
+      "updated": "Stock in updated",
+      "deleted": "Stock in deleted",
+      "missingId": "This stock in entry cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete stock in",
+      "message": "Delete stock in entry for \"{product}\"?"
     }
   }
 }

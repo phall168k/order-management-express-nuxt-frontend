@@ -9,6 +9,7 @@
     "categories": "ប្រភេទទំនិញ",
     "products": "ទំនិញ",
     "stocks": "ស្តុក",
+    "stockIns": "ស្តុកចូល",
     "userProfiles": "ប្រវត្តិរូបអ្នកប្រើ",
     "users": "អ្នកប្រើប្រាស់",
     "roles": "តួនាទី"
@@ -350,6 +351,53 @@
     "confirmDelete": {
       "title": "លុបស្តុក",
       "message": "លុបស្តុកសម្រាប់ \"{product}\"?"
+    }
+  },
+  "stockIns": {
+    "title": "ស្តុកចូល",
+    "description": "កត់ត្រាចំនួនស្តុកចូលតាមទំនិញ និងកាលបរិច្ឆេទ។",
+    "stockInDate": "ថ្ងៃស្តុកចូល",
+    "no": "ល.រ",
+    "product": "ទំនិញ",
+    "quantity": "ចំនួន",
+    "note": "ចំណាំ",
+    "itemTitle": "ធាតុ {number}",
+    "itemCount": "{count} ធាតុ",
+    "items": "បញ្ជីធាតុ",
+    "actions": {
+      "new": "ស្តុកចូលថ្មី",
+      "create": "បង្កើតស្តុកចូល",
+      "edit": "កែប្រែស្តុកចូល",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបស្តុកចូល",
+      "addItem": "បន្ថែមធាតុ",
+      "removeItem": "ដកធាតុចេញ"
+    },
+    "dialog": {
+      "createTitle": "ស្តុកចូលថ្មី",
+      "editTitle": "កែប្រែស្តុកចូល"
+    },
+    "placeholders": {
+      "stockInDate": "2026-07-01",
+      "product": "ជ្រើសរើសទំនិញ",
+      "note": "Initial stock in"
+    },
+    "validation": {
+      "stockInDateRequired": "ត្រូវការថ្ងៃស្តុកចូល",
+      "productRequired": "ត្រូវការទំនិញ",
+      "productDuplicate": "ទំនិញនេះត្រូវបានជ្រើសរើសរួចហើយនៅក្នុងធាតុផ្សេង",
+      "quantityRequired": "ត្រូវការចំនួន",
+      "quantityMin": "ចំនួនត្រូវមានយ៉ាងតិច ១"
+    },
+    "messages": {
+      "created": "បានបង្កើតស្តុកចូល",
+      "updated": "បានកែប្រែស្តុកចូល",
+      "deleted": "បានលុបស្តុកចូល",
+      "missingId": "មិនអាចលុបស្តុកចូលនេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបស្តុកចូល",
+      "message": "លុបស្តុកចូលសម្រាប់ \"{product}\"?"
     }
   }
 }
