@@ -364,6 +364,7 @@
     "itemTitle": "Item {number}",
     "itemCount": "{count} items",
     "items": "Items",
+    "code": "Code",
     "actions": {
       "new": "New stock in",
       "create": "Create stock in",

@@ -21,6 +21,11 @@
 
     <div class="p-5">
       <el-table v-loading="isLoading" :data="stockIns" stripe class="w-full">
+        <el-table-column :label="t('stockIns.code')" min-width="150">
+          <template #default="{ row }">
+            {{ getStockInCode(row) }}
+          </template>
+        </el-table-column>
         <el-table-column :label="t('stockIns.stockInDate')" min-width="150">
           <template #default="{ row }">
             {{ formatDate(row.stockInDate) }}
@@ -86,6 +91,13 @@
         label-position="top"
         @submit.prevent="submitStockIn"
       >
+        <el-form-item v-if="isEditing" :label="t('stockIns.code')" prop="code">
+          <el-input
+            v-model="form.code"
+            :placeholder="t('stockIns.code')"
+            readonly
+          />
+        </el-form-item>
         <el-form-item :label="t('stockIns.stockInDate')" prop="stockInDate" :rules="stockInDateRules">
           <el-date-picker
             v-model="form.stockInDate"
@@ -210,6 +222,7 @@ type ProductOption = {
 type ApiStockIn = {
   _id?: string
   id?: string
+  code?: string
   stockInDate: string
   product?: string | ProductOption
   quantity: number
@@ -237,6 +250,7 @@ type StockInForm = {
 }
 
 type StockInFormModel = {
+  code: string
   stockInDate: string
   items: StockInForm[]
 }
@@ -301,6 +315,7 @@ const isLoadingProducts = ref(false)
 const isSaving = ref(false)
 const isDialogVisible = ref(false)
 const editingStockInId = ref<string | null>(null)
+const editingStockIn = ref<ApiStockIn | null>(null)
 const stockInFormRef = ref<FormInstance>()
 
 const getToday = () => {
@@ -321,6 +336,7 @@ const createItem = (item?: Partial<StockInForm>): StockInForm => ({
 })
 
 const form = reactive<StockInFormModel>({
+  code: '',
   stockInDate: getToday(),
   items: [createItem()]
 })
@@ -384,6 +400,14 @@ const getProductOptionLabel = (product: ProductOption) => {
   return product.code ? `${product.code} - ${product.nameEn}` : product.nameEn
 }
 
+const getProductCode = (product?: string | ProductOption) => {
+  const productId = getProductId(product)
+
+  if (typeof product === 'object' && product?.code) return product.code
+
+  return productOptions.value.find((item) => item._id === productId || item.id === productId)?.code || ''
+}
+
 const hasProductStock = (product: ProductOption) => {
   if (Array.isArray(product.stock)) return product.stock.length > 0
   return Boolean(product.stock)
@@ -416,6 +440,16 @@ const getStockInProductLabel = (stockIn: ApiStockIn) => {
   if (items.length === 1) return getProductLabel(items[0]?.product)
 
   return t('stockIns.itemCount', { count: items.length })
+}
+
+const getStockInCode = (stockIn: ApiStockIn) => {
+  if (stockIn.code) return stockIn.code
+
+  const items = getStockInItems(stockIn)
+  if (!items.length) return getProductCode(stockIn.product) || '-'
+  if (items.length === 1) return getProductCode(items[0]?.product) || '-'
+
+  return '-'
 }
 
 const extractStockIns = (response: StockInResponse): ApiStockIn[] => {
@@ -551,6 +585,8 @@ const removeItem = (index: number) => {
 
 const resetForm = () => {
   editingStockInId.value = null
+  editingStockIn.value = null
+  form.code = ''
   form.stockInDate = getToday()
   form.items = [createItem()]
   stockInFormRef.value?.clearValidate()
@@ -567,6 +603,8 @@ const openEditDialog = (stockIn: ApiStockIn) => {
   if (!canUpdateStockIn.value) return
 
   editingStockInId.value = getStockInId(stockIn)
+  editingStockIn.value = stockIn
+  form.code = getStockInCode(stockIn)
   form.stockInDate = formatDate(stockIn.stockInDate)
   const items = getStockInItems(stockIn)
   form.items = items.length
@@ -693,6 +731,12 @@ watch([currentPage, pageSize], () => {
 watch(search, () => {
   currentPage.value = 1
   refreshStockIns()
+})
+
+watch(productOptions, () => {
+  if (isEditing.value && editingStockIn.value) {
+    form.code = getStockInCode(editingStockIn.value)
+  }
 })
 
 onMounted(() => {

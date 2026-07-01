@@ -364,6 +364,7 @@
     "itemTitle": "ធាតុ {number}",
     "itemCount": "{count} ធាតុ",
     "items": "បញ្ជីធាតុ",
+     "code": "កូដ",
     "actions": {
       "new": "ស្តុកចូលថ្មី",
       "create": "បង្កើតស្តុកចូល",
