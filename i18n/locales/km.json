@@ -11,6 +11,7 @@
     "stocks": "ស្តុក",
     "stockIns": "ស្តុកចូល",
     "stockAdjustments": "កែតម្រូវស្តុក",
+    "paymentMethods": "វិធីបង់ប្រាក់",
     "userProfiles": "ប្រវត្តិរូបអ្នកប្រើ",
     "users": "អ្នកប្រើប្រាស់",
     "roles": "តួនាទី"
@@ -309,6 +310,71 @@
     "confirmDelete": {
       "title": "លុបទំនិញ",
       "message": "លុបទំនិញ \"{code}\"?"
+    }
+  },
+  "paymentMethods": {
+    "title": "វិធីបង់ប្រាក់",
+    "description": "គ្រប់គ្រងការកំណត់ធនាគារ និងអ្នកលក់សម្រាប់វិធីបង់ប្រាក់។",
+    "logo": "រូបសញ្ញា",
+    "bankAccount": "គណនីធនាគារ",
+    "merchantName": "ឈ្មោះអ្នកលក់",
+    "merchantCity": "ទីក្រុងអ្នកលក់",
+    "amount": "ចំនួនទឹកប្រាក់",
+    "currency": "រូបិយប័ណ្ណ",
+    "storeLabel": "ស្លាកហាង",
+    "phoneNumber": "លេខទូរស័ព្ទ",
+    "billNumber": "លេខវិក្កយបត្រ",
+    "terminalLabel": "ស្លាកម៉ាស៊ីន",
+    "isActive": "សកម្ម",
+    "status": {
+      "active": "សកម្ម",
+      "inactive": "អសកម្ម"
+    },
+    "actions": {
+      "new": "វិធីបង់ប្រាក់ថ្មី",
+      "create": "បង្កើតវិធីបង់ប្រាក់",
+      "edit": "កែប្រែវិធីបង់ប្រាក់",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបវិធីបង់ប្រាក់"
+    },
+    "dialog": {
+      "createTitle": "វិធីបង់ប្រាក់ថ្មី",
+      "editTitle": "កែប្រែវិធីបង់ប្រាក់"
+    },
+    "placeholders": {
+      "logo": "uploads/payment-methods/aba.png",
+      "bankAccount": "001234567",
+      "merchantName": "Demo Store",
+      "merchantCity": "Phnom Penh",
+      "amount": "10.50",
+      "currency": "ជ្រើសរើសរូបិយប័ណ្ណ",
+      "storeLabel": "Main Branch",
+      "phoneNumber": "+85512345678",
+      "billNumber": "BILL-001",
+      "terminalLabel": "POS-01"
+    },
+    "validation": {
+      "logoRequired": "ត្រូវការរូបសញ្ញា",
+      "bankAccountRequired": "ត្រូវការគណនីធនាគារ",
+      "merchantNameRequired": "ត្រូវការឈ្មោះអ្នកលក់",
+      "merchantCityRequired": "ត្រូវការទីក្រុងអ្នកលក់",
+      "amountRequired": "ត្រូវការចំនួនទឹកប្រាក់",
+      "amountMin": "ចំនួនទឹកប្រាក់មិនអាចតិចជាងសូន្យ",
+      "currencyRequired": "ត្រូវការរូបិយប័ណ្ណ",
+      "storeLabelRequired": "ត្រូវការស្លាកហាង",
+      "phoneNumberRequired": "ត្រូវការលេខទូរស័ព្ទ",
+      "billNumberRequired": "ត្រូវការលេខវិក្កយបត្រ",
+      "terminalLabelRequired": "ត្រូវការស្លាកម៉ាស៊ីន"
+    },
+    "messages": {
+      "created": "បានបង្កើតវិធីបង់ប្រាក់",
+      "updated": "បានកែប្រែវិធីបង់ប្រាក់",
+      "deleted": "បានលុបវិធីបង់ប្រាក់",
+      "missingId": "មិនអាចលុបវិធីបង់ប្រាក់នេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបវិធីបង់ប្រាក់",
+      "message": "លុបវិធីបង់ប្រាក់ \"{merchantName}\"?"
     }
   },
   "stocks": {

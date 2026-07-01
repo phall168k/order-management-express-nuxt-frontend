@@ -11,6 +11,7 @@
     "stocks": "Stock",
     "stockIns": "Stock in",
     "stockAdjustments": "Stock adjustment",
+    "paymentMethods": "Payment methods",
     "userProfiles": "User profiles",
     "users": "Users",
     "roles": "Roles"
@@ -309,6 +310,71 @@
     "confirmDelete": {
       "title": "Delete product",
       "message": "Delete product \"{code}\"?"
+    }
+  },
+  "paymentMethods": {
+    "title": "Payment methods",
+    "description": "Manage bank and merchant payment method settings.",
+    "logo": "Logo",
+    "bankAccount": "Bank account",
+    "merchantName": "Merchant name",
+    "merchantCity": "Merchant city",
+    "amount": "Amount",
+    "currency": "Currency",
+    "storeLabel": "Store label",
+    "phoneNumber": "Phone number",
+    "billNumber": "Bill number",
+    "terminalLabel": "Terminal label",
+    "isActive": "Active",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "new": "New payment method",
+      "create": "Create payment method",
+      "edit": "Edit payment method",
+      "save": "Save changes",
+      "delete": "Delete payment method"
+    },
+    "dialog": {
+      "createTitle": "New payment method",
+      "editTitle": "Edit payment method"
+    },
+    "placeholders": {
+      "logo": "uploads/payment-methods/aba.png",
+      "bankAccount": "001234567",
+      "merchantName": "Demo Store",
+      "merchantCity": "Phnom Penh",
+      "amount": "10.50",
+      "currency": "Select currency",
+      "storeLabel": "Main Branch",
+      "phoneNumber": "+85512345678",
+      "billNumber": "BILL-001",
+      "terminalLabel": "POS-01"
+    },
+    "validation": {
+      "logoRequired": "Logo is required",
+      "bankAccountRequired": "Bank account is required",
+      "merchantNameRequired": "Merchant name is required",
+      "merchantCityRequired": "Merchant city is required",
+      "amountRequired": "Amount is required",
+      "amountMin": "Amount cannot be negative",
+      "currencyRequired": "Currency is required",
+      "storeLabelRequired": "Store label is required",
+      "phoneNumberRequired": "Phone number is required",
+      "billNumberRequired": "Bill number is required",
+      "terminalLabelRequired": "Terminal label is required"
+    },
+    "messages": {
+      "created": "Payment method created",
+      "updated": "Payment method updated",
+      "deleted": "Payment method deleted",
+      "missingId": "This payment method cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete payment method",
+      "message": "Delete payment method \"{merchantName}\"?"
     }
   },
   "stocks": {
