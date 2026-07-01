@@ -23,6 +23,11 @@
       <el-table v-loading="isLoading" :data="paginatedUsers" stripe class="w-full">
         <el-table-column prop="username" :label="t('users.username')" min-width="150" />
         <el-table-column prop="email" :label="t('users.email')" min-width="220" />
+        <el-table-column :label="t('users.userProfile')" min-width="200">
+          <template #default="{ row }">
+            {{ getUserProfileLabel(getUserProfileId(row.userProfile)) }}
+          </template>
+        </el-table-column>
         <el-table-column :label="t('users.roles')" min-width="220">
           <template #default="{ row }">
             <div class="flex flex-wrap gap-1">
@@ -101,8 +106,8 @@
           </el-form-item>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-2">
-          <el-form-item :label="isEditing ? t('users.passwordOptional') : t('users.password')" prop="password">
+        <div v-if="!isEditing" class="grid gap-4 md:grid-cols-2">
+          <el-form-item :label="t('users.password')" prop="password">
             <el-input
               v-model="form.password"
               autocomplete="new-password"
@@ -122,6 +127,25 @@
             />
           </el-form-item>
         </div>
+
+        <el-form-item :label="t('users.userProfile')" prop="userProfile">
+          <el-select
+            v-model="form.userProfile"
+            clearable
+            default-first-option
+            filterable
+            :loading="isLoadingUserProfiles"
+            :placeholder="t('users.placeholders.userProfile')"
+            class="w-full"
+          >
+            <el-option
+              v-for="userProfile in userProfileOptions"
+              :key="userProfile._id"
+              :label="getUserProfileOptionLabel(userProfile)"
+              :value="userProfile._id"
+            />
+          </el-select>
+        </el-form-item>
 
         <el-form-item :label="t('users.roles')" prop="roles">
           <el-select
@@ -180,6 +204,7 @@ type ApiUser = {
   id?: string
   username: string
   email: string
+  userProfile?: string | UserProfileOption
   roles?: Array<string | RoleOption>
   isSuperUser?: boolean
   isActive?: boolean
@@ -190,12 +215,15 @@ type UserForm = {
   email: string
   password: string
   confirmPassword: string
+  userProfile: string
   roles: string[]
   isSuperUser: boolean
   isActive: boolean
 }
 
-type UserPayload = Omit<UserForm, 'confirmPassword'>
+type UserPayload = Omit<UserForm, 'confirmPassword' | 'userProfile'> & {
+  userProfile?: string
+}
 
 type RawRoleOption = RoleOption | [string, string] | {
   id?: string
@@ -208,6 +236,23 @@ type RawRoleOption = RoleOption | [string, string] | {
 type RoleOption = {
   _id: string
   name: string
+}
+
+type RawUserProfileOption = UserProfileOption | [string, string] | {
+  id?: string
+  value?: string
+  label?: string
+  text?: string
+  title?: string
+  code?: string
+  firstName?: string
+  lastName?: string
+}
+
+type UserProfileOption = {
+  _id: string
+  label: string
+  code?: string
 }
 
 type UserResponse = ApiUser[] | {
@@ -233,6 +278,23 @@ type RoleOptionsResponse = RawRoleOption[] | {
   results?: RawRoleOption[]
 }
 
+type UserProfileOptionsResponse = RawUserProfileOption[] | {
+  data?: RawUserProfileOption[] | {
+    userProfiles?: RawUserProfileOption[]
+    profiles?: RawUserProfileOption[]
+    items?: RawUserProfileOption[]
+    docs?: RawUserProfileOption[]
+    options?: RawUserProfileOption[]
+    results?: RawUserProfileOption[]
+  }
+  userProfiles?: RawUserProfileOption[]
+  profiles?: RawUserProfileOption[]
+  items?: RawUserProfileOption[]
+  docs?: RawUserProfileOption[]
+  options?: RawUserProfileOption[]
+  results?: RawUserProfileOption[]
+}
+
 const { t } = useI18n()
 const config = useRuntimeConfig()
 const authToken = useCookie<string | null>('auth_token')
@@ -241,14 +303,17 @@ const { hasPermission } = useAuth()
 const apiBaseUrl = computed(() => String(config.public.apiBaseUrl).replace(/\/$/, ''))
 const usersEndpoint = computed(() => `${apiBaseUrl.value}/system/users`)
 const roleOptionsEndpoint = computed(() => `${apiBaseUrl.value}/system/roles/select-options`)
+const userProfileOptionsEndpoint = computed(() => `${apiBaseUrl.value}/system/user-profiles/select-options`)
 
 const search = ref('')
 const currentPage = ref(1)
 const pageSize = ref(5)
 const users = ref<ApiUser[]>([])
 const roleOptions = ref<RoleOption[]>([])
+const userProfileOptions = ref<UserProfileOption[]>([])
 const isLoading = ref(false)
 const isLoadingRoles = ref(false)
+const isLoadingUserProfiles = ref(false)
 const isSaving = ref(false)
 const isDialogVisible = ref(false)
 const editingUserId = ref<string | null>(null)
@@ -259,6 +324,7 @@ const form = reactive<UserForm>({
   email: '',
   password: '',
   confirmPassword: '',
+  userProfile: '',
   roles: [],
   isSuperUser: false,
   isActive: true
@@ -327,6 +393,16 @@ const requestHeaders = computed(() => ({
 const getUserId = (user: ApiUser) => user._id || user.id || ''
 const getRoleId = (role: string | RoleOption) => typeof role === 'string' ? role : role._id
 const getRoleLabel = (roleId: string) => roleOptions.value.find((role) => role._id === roleId)?.name || roleId
+const getUserProfileId = (userProfile?: string | UserProfileOption) => {
+  return typeof userProfile === 'string' ? userProfile : userProfile?._id || ''
+}
+const getUserProfileOptionLabel = (userProfile: UserProfileOption) => {
+  return userProfile.code ? `${userProfile.code} - ${userProfile.label}` : userProfile.label
+}
+const getUserProfileLabel = (userProfileId: string) => {
+  if (!userProfileId) return '-'
+  return userProfileOptions.value.find((userProfile) => userProfile._id === userProfileId)?.label || userProfileId
+}
 
 const extractUsers = (response: UserResponse): ApiUser[] => {
   if (Array.isArray(response)) return response
@@ -352,6 +428,19 @@ const normalizeRoleOption = (option: RawRoleOption): RoleOption | null => {
   return _id && name ? { _id, name } : null
 }
 
+const normalizeUserProfileOption = (option: RawUserProfileOption): UserProfileOption | null => {
+  if (Array.isArray(option)) {
+    const [_id, label] = option
+    return _id && label ? { _id, label } : null
+  }
+
+  const _id = option._id || option.id || option.value
+  const fullName = [option.firstName, option.lastName].filter(Boolean).join(' ')
+  const label = option.label || option.name || option.text || option.title || fullName || option.code
+
+  return _id && label ? { _id, label, code: option.code } : null
+}
+
 const extractRoleOptions = (response: RoleOptionsResponse): RoleOption[] => {
   let options: RawRoleOption[] = []
 
@@ -373,6 +462,29 @@ const extractRoleOptions = (response: RoleOptionsResponse): RoleOption[] => {
     .filter((option): option is RoleOption => Boolean(option))
 }
 
+const extractUserProfileOptions = (response: UserProfileOptionsResponse): UserProfileOption[] => {
+  let options: RawUserProfileOption[] = []
+
+  if (Array.isArray(response)) options = response
+  else if (Array.isArray(response.data)) options = response.data
+  else if (Array.isArray(response.data?.userProfiles)) options = response.data.userProfiles
+  else if (Array.isArray(response.data?.profiles)) options = response.data.profiles
+  else if (Array.isArray(response.data?.items)) options = response.data.items
+  else if (Array.isArray(response.data?.docs)) options = response.data.docs
+  else if (Array.isArray(response.data?.options)) options = response.data.options
+  else if (Array.isArray(response.data?.results)) options = response.data.results
+  else if (Array.isArray(response.userProfiles)) options = response.userProfiles
+  else if (Array.isArray(response.profiles)) options = response.profiles
+  else if (Array.isArray(response.items)) options = response.items
+  else if (Array.isArray(response.docs)) options = response.docs
+  else if (Array.isArray(response.options)) options = response.options
+  else if (Array.isArray(response.results)) options = response.results
+
+  return options
+    .map(normalizeUserProfileOption)
+    .filter((option): option is UserProfileOption => Boolean(option))
+}
+
 const ensureSelectedRoleOptions = (roleIds: string[]) => {
   const existingRoleIds = new Set(roleOptions.value.map((role) => role._id))
   const missingRoleOptions = roleIds
@@ -381,6 +493,22 @@ const ensureSelectedRoleOptions = (roleIds: string[]) => {
 
   if (missingRoleOptions.length) {
     roleOptions.value = [...roleOptions.value, ...missingRoleOptions]
+  }
+}
+
+const ensureSelectedUserProfileOption = (userProfile?: string | UserProfileOption) => {
+  const userProfileId = getUserProfileId(userProfile)
+  if (!userProfileId) return
+
+  const hasUserProfile = userProfileOptions.value.some((option) => option._id === userProfileId)
+  if (hasUserProfile) return
+
+  const normalizedOption = typeof userProfile === 'string'
+    ? { _id: userProfile, label: userProfile }
+    : normalizeUserProfileOption(userProfile)
+
+  if (normalizedOption) {
+    userProfileOptions.value = [...userProfileOptions.value, normalizedOption]
   }
 }
 
@@ -401,6 +529,7 @@ const filteredUsers = computed(() => {
     const values = [
       user.username,
       user.email,
+      getUserProfileLabel(getUserProfileId(user.userProfile)),
       ...(user.roles || []),
       ...(user.roles || []).map((roleId) => getRoleLabel(getRoleId(roleId))),
       user.isSuperUser ? t('common.yes') : t('common.no'),
@@ -423,6 +552,7 @@ const resetForm = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    userProfile: '',
     roles: roleOptions.value[0]?._id ? [roleOptions.value[0]._id] : [],
     isSuperUser: false,
     isActive: true
@@ -438,12 +568,17 @@ const refreshUsers = async () => {
       headers: requestHeaders.value
     })
 
-    users.value = extractUsers(response).map((user) => ({
-      ...user,
-      roles: (user.roles || []).map(getRoleId),
-      isSuperUser: Boolean(user.isSuperUser),
-      isActive: user.isActive !== false
-    }))
+    users.value = extractUsers(response).map((user) => {
+      ensureSelectedUserProfileOption(user.userProfile)
+
+      return {
+        ...user,
+        userProfile: getUserProfileId(user.userProfile),
+        roles: (user.roles || []).map(getRoleId),
+        isSuperUser: Boolean(user.isSuperUser),
+        isActive: user.isActive !== false
+      }
+    })
   } catch (error) {
     ElMessage.error(getErrorMessage(error))
   } finally {
@@ -451,14 +586,15 @@ const refreshUsers = async () => {
   }
 }
 
-const openCreateDialog = () => {
+const openCreateDialog = async () => {
   if (!canCreateUser.value) return
 
   resetForm()
   isDialogVisible.value = true
+  await refreshUserProfileOptions('unmapped')
 }
 
-const openEditDialog = (user: ApiUser) => {
+const openEditDialog = async (user: ApiUser) => {
   if (!canUpdateUser.value) return
 
   editingUserId.value = getUserId(user)
@@ -467,11 +603,14 @@ const openEditDialog = (user: ApiUser) => {
     email: user.email,
     password: '',
     confirmPassword: '',
+    userProfile: getUserProfileId(user.userProfile),
     roles: (user.roles || []).map(getRoleId),
     isSuperUser: Boolean(user.isSuperUser),
     isActive: user.isActive !== false
   })
+  ensureSelectedUserProfileOption(user.userProfile)
   isDialogVisible.value = true
+  await refreshUserProfileOptions('all', user.userProfile)
 }
 
 const buildPayload = () => {
@@ -484,11 +623,35 @@ const buildPayload = () => {
     isActive: form.isActive
   }
 
-  if (isEditing.value && !payload.password) {
+  if (form.userProfile) {
+    payload.userProfile = form.userProfile
+  }
+
+  if (isEditing.value) {
     delete (payload as Partial<UserPayload>).password
   }
 
   return payload
+}
+
+const refreshUserProfileOptions = async (mode: 'all' | 'unmapped' = 'unmapped', selectedUserProfile?: string | UserProfileOption) => {
+  isLoadingUserProfiles.value = true
+
+  try {
+    const response = await $fetch<UserProfileOptionsResponse>(userProfileOptionsEndpoint.value, {
+      headers: requestHeaders.value,
+      query: {
+        mode
+      }
+    })
+
+    userProfileOptions.value = extractUserProfileOptions(response)
+    ensureSelectedUserProfileOption(selectedUserProfile || form.userProfile)
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error))
+  } finally {
+    isLoadingUserProfiles.value = false
+  }
 }
 
 const refreshRoleOptions = async () => {
@@ -579,6 +742,7 @@ watch(search, () => {
 
 onMounted(() => {
   refreshRoleOptions()
+  refreshUserProfileOptions()
   refreshUsers()
 })
 </script>

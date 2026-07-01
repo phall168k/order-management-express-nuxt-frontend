@@ -8,6 +8,7 @@
     "dashboard": "Dashboard",
     "categories": "Categories",
     "products": "Products",
+    "userProfiles": "User profiles",
     "users": "Users",
     "roles": "Roles"
   },
@@ -53,11 +54,11 @@
     "name": "Name",
     "username": "Username",
     "email": "Email",
+    "userProfile": "User profile",
     "role": "Role",
     "roles": "Roles",
     "emptyRoles": "No roles",
     "password": "Password",
-    "passwordOptional": "Password (leave blank to keep current)",
     "confirmPassword": "Confirm password",
     "isSuperUser": "Super user",
     "isActive": "Active",
@@ -76,6 +77,7 @@
     "placeholders": {
       "username": "admin",
       "email": "admin{'@'}example.com",
+      "userProfile": "Select user profile",
       "password": "secret123",
       "confirmPassword": "Confirm password",
       "roles": "Select roles"
@@ -149,6 +151,73 @@
       "disabled": "Disabled"
     }
   },
+  "userProfiles": {
+    "title": "User profile management",
+    "description": "Manage staff and customer profile details.",
+    "code": "Code",
+    "userType": "User type",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "fullName": "Full name",
+    "gender": "Gender",
+    "dob": "Date of birth",
+    "phoneNumber": "Phone number",
+    "address": "Address",
+    "note": "Note",
+    "profile": "Profile photo",
+    "actions": {
+      "new": "New profile",
+      "create": "Create profile",
+      "edit": "Edit profile",
+      "save": "Save changes",
+      "delete": "Delete profile"
+    },
+    "dialog": {
+      "createTitle": "New user profile",
+      "editTitle": "Edit user profile"
+    },
+    "placeholders": {
+      "code": "UP-001",
+      "userType": "Select user type",
+      "firstName": "Sok",
+      "lastName": "Dara",
+      "gender": "Select gender",
+      "dob": "1998-01-15",
+      "phoneNumber": "+85512345678",
+      "address": "Phnom Penh",
+      "note": "Internal staff profile",
+      "profile": "uploads/profiles/sok-dara.jpg"
+    },
+    "validation": {
+      "codeRequired": "Code is required",
+      "userTypeRequired": "User type is required",
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "genderRequired": "Gender is required",
+      "dobRequired": "Date of birth is required"
+    },
+    "messages": {
+      "created": "User profile created",
+      "updated": "User profile updated",
+      "deleted": "User profile deleted",
+      "missingId": "This user profile cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete user profile",
+      "message": "Delete user profile \"{code}\"?"
+    },
+    "userTypes": {
+      "staff": "Staff",
+      "customer": "Customer",
+      "admin": "Admin",
+      "supplier": "Supplier"
+    },
+    "genders": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    }
+  },
   "categories": {
     "title": "Category management",
     "description": "Manage product categories and display names.",
@@ -194,6 +263,7 @@
     "code": "Code",
     "nameEn": "Name (EN)",
     "nameKh": "Name (KH)",
+    "category": "Category",
     "unitPrice": "Unit price",
     "thumbnail": "Thumbnail",
     "actions": {
@@ -211,6 +281,7 @@
       "code": "PROD-001",
       "nameEn": "Sample Product",
       "nameKh": "Sample Product KH",
+      "category": "Select category",
       "thumbnail": "uploads/products/sample-product.jpg",
       "description": "Sample product description"
     },
@@ -218,6 +289,7 @@
       "codeRequired": "Code is required",
       "nameEnRequired": "English name is required",
       "nameKhRequired": "Khmer name is required",
+      "categoryRequired": "Category is required",
       "unitPriceRequired": "Unit price is required",
       "unitPriceMin": "Unit price cannot be negative"
     },

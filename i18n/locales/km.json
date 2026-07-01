@@ -8,6 +8,7 @@
     "dashboard": "ផ្ទាំងសង្ខេប",
     "categories": "ប្រភេទទំនិញ",
     "products": "ទំនិញ",
+    "userProfiles": "ប្រវត្តិរូបអ្នកប្រើ",
     "users": "អ្នកប្រើប្រាស់",
     "roles": "តួនាទី"
   },
@@ -53,11 +54,11 @@
     "name": "ឈ្មោះ",
     "username": "ឈ្មោះអ្នកប្រើ",
     "email": "អ៊ីមែល",
+    "userProfile": "ប្រវត្តិរូបអ្នកប្រើ",
     "role": "តួនាទី",
     "roles": "តួនាទី",
     "emptyRoles": "មិនមានតួនាទី",
     "password": "ពាក្យសម្ងាត់",
-    "passwordOptional": "ពាក្យសម្ងាត់ (ទុកទទេ ប្រសិនបើមិនចង់ផ្លាស់ប្តូរ)",
     "confirmPassword": "បញ្ជាក់ពាក្យសម្ងាត់",
     "isSuperUser": "អ្នកប្រើកម្រិតខ្ពស់",
     "isActive": "សកម្ម",
@@ -76,6 +77,7 @@
     "placeholders": {
       "username": "admin",
       "email": "admin{'@'}example.com",
+      "userProfile": "ជ្រើសរើសប្រវត្តិរូបអ្នកប្រើ",
       "password": "secret123",
       "confirmPassword": "បញ្ជាក់ពាក្យសម្ងាត់",
       "roles": "ជ្រើសរើសតួនាទី"
@@ -149,6 +151,73 @@
       "disabled": "បិទ"
     }
   },
+  "userProfiles": {
+    "title": "គ្រប់គ្រងប្រវត្តិរូបអ្នកប្រើ",
+    "description": "គ្រប់គ្រងព័ត៌មានប្រវត្តិរូបបុគ្គលិក និងអតិថិជន។",
+    "code": "កូដ",
+    "userType": "ប្រភេទអ្នកប្រើ",
+    "firstName": "នាមខ្លួន",
+    "lastName": "នាមត្រកូល",
+    "fullName": "ឈ្មោះពេញ",
+    "gender": "ភេទ",
+    "dob": "ថ្ងៃខែឆ្នាំកំណើត",
+    "phoneNumber": "លេខទូរស័ព្ទ",
+    "address": "អាសយដ្ឋាន",
+    "note": "ចំណាំ",
+    "profile": "រូបថតប្រវត្តិរូប",
+    "actions": {
+      "new": "ប្រវត្តិរូបថ្មី",
+      "create": "បង្កើតប្រវត្តិរូប",
+      "edit": "កែប្រែប្រវត្តិរូប",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបប្រវត្តិរូប"
+    },
+    "dialog": {
+      "createTitle": "ប្រវត្តិរូបអ្នកប្រើថ្មី",
+      "editTitle": "កែប្រែប្រវត្តិរូបអ្នកប្រើ"
+    },
+    "placeholders": {
+      "code": "UP-001",
+      "userType": "ជ្រើសរើសប្រភេទអ្នកប្រើ",
+      "firstName": "Sok",
+      "lastName": "Dara",
+      "gender": "ជ្រើសរើសភេទ",
+      "dob": "1998-01-15",
+      "phoneNumber": "+85512345678",
+      "address": "ភ្នំពេញ",
+      "note": "Internal staff profile",
+      "profile": "uploads/profiles/sok-dara.jpg"
+    },
+    "validation": {
+      "codeRequired": "ត្រូវការកូដ",
+      "userTypeRequired": "ត្រូវការប្រភេទអ្នកប្រើ",
+      "firstNameRequired": "ត្រូវការនាមខ្លួន",
+      "lastNameRequired": "ត្រូវការនាមត្រកូល",
+      "genderRequired": "ត្រូវការភេទ",
+      "dobRequired": "ត្រូវការថ្ងៃខែឆ្នាំកំណើត"
+    },
+    "messages": {
+      "created": "បានបង្កើតប្រវត្តិរូបអ្នកប្រើ",
+      "updated": "បានកែប្រែប្រវត្តិរូបអ្នកប្រើ",
+      "deleted": "បានលុបប្រវត្តិរូបអ្នកប្រើ",
+      "missingId": "មិនអាចលុបប្រវត្តិរូបអ្នកប្រើនេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបប្រវត្តិរូបអ្នកប្រើ",
+      "message": "លុបប្រវត្តិរូបអ្នកប្រើ \"{code}\"?"
+    },
+    "userTypes": {
+      "staff": "បុគ្គលិក",
+      "customer": "អតិថិជន",
+      "admin": "អ្នកគ្រប់គ្រង",
+      "supplier": "អ្នកផ្គត់ផ្គង់"
+    },
+    "genders": {
+      "male": "ប្រុស",
+      "female": "ស្រី",
+      "other": "ផ្សេងៗ"
+    }
+  },
   "categories": {
     "title": "គ្រប់គ្រងប្រភេទទំនិញ",
     "description": "គ្រប់គ្រងប្រភេទទំនិញ និងឈ្មោះបង្ហាញ។",
@@ -194,6 +263,7 @@
     "code": "កូដ",
     "nameEn": "ឈ្មោះ (EN)",
     "nameKh": "ឈ្មោះ (KH)",
+    "category": "ប្រភេទ",
     "unitPrice": "តម្លៃឯកតា",
     "thumbnail": "រូបភាព",
     "actions": {
@@ -211,6 +281,7 @@
       "code": "PROD-001",
       "nameEn": "Sample Product",
       "nameKh": "Sample Product KH",
+      "category": "ជ្រើសរើសប្រភេទ",
       "thumbnail": "uploads/products/sample-product.jpg",
       "description": "Sample product description"
     },
@@ -218,6 +289,7 @@
       "codeRequired": "ត្រូវការកូដ",
       "nameEnRequired": "ត្រូវការឈ្មោះអង់គ្លេស",
       "nameKhRequired": "ត្រូវការឈ្មោះខ្មែរ",
+      "categoryRequired": "ត្រូវការប្រភេទ",
       "unitPriceRequired": "ត្រូវការតម្លៃឯកតា",
       "unitPriceMin": "តម្លៃឯកតាមិនអាចតិចជាងសូន្យ"
     },

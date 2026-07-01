@@ -37,6 +37,11 @@
         <el-table-column prop="code" :label="t('products.code')" min-width="130" />
         <el-table-column prop="nameEn" :label="t('products.nameEn')" min-width="180" />
         <el-table-column prop="nameKh" :label="t('products.nameKh')" min-width="180" />
+        <el-table-column :label="t('products.category')" min-width="180">
+          <template #default="{ row }">
+            {{ getCategoryLabel(row.category) }}
+          </template>
+        </el-table-column>
         <el-table-column :label="t('products.unitPrice')" min-width="130">
           <template #default="{ row }">
             {{ formatPrice(row.unitPrice) }}
@@ -87,33 +92,42 @@
         label-position="top"
         @submit.prevent="submitProduct"
       >
-        <div class="grid gap-4 md:grid-cols-2">
-          <el-form-item :label="t('products.code')" prop="code">
-            <el-input v-model="form.code" :placeholder="t('products.placeholders.code')" />
-          </el-form-item>
+        <el-form-item :label="t('products.code')" prop="code">
+          <el-input v-model="form.code" :placeholder="t('products.placeholders.code')" />
+        </el-form-item>
 
-          <el-form-item :label="t('products.unitPrice')" prop="unitPrice">
-            <el-input-number
-              v-model="form.unitPrice"
-              :min="0"
-              :precision="2"
-              :step="0.5"
-              class="w-full"
-              controls-position="right"
+        <el-form-item :label="t('products.category')" prop="category">
+          <el-select
+            v-model="form.category"
+            class="w-full"
+            filterable
+            :loading="isLoadingCategories"
+            :placeholder="t('products.placeholders.category')"
+          >
+            <el-option
+              v-for="category in categoryOptions"
+              :key="category._id"
+              :label="getCategoryOptionLabel(category)"
+              :value="category._id"
             />
-          </el-form-item>
-        </div>
-
-        <div class="grid gap-4 md:grid-cols-2">
-          <el-form-item :label="t('products.nameEn')" prop="nameEn">
-            <el-input v-model="form.nameEn" :placeholder="t('products.placeholders.nameEn')" />
-          </el-form-item>
-
-          <el-form-item :label="t('products.nameKh')" prop="nameKh">
-            <el-input v-model="form.nameKh" :placeholder="t('products.placeholders.nameKh')" />
-          </el-form-item>
-        </div>
-
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="t('products.nameEn')" prop="nameEn">
+          <el-input v-model="form.nameEn" :placeholder="t('products.placeholders.nameEn')" />
+        </el-form-item>
+        <el-form-item :label="t('products.nameKh')" prop="nameKh">
+          <el-input v-model="form.nameKh" :placeholder="t('products.placeholders.nameKh')" />
+        </el-form-item>
+        <el-form-item :label="t('products.unitPrice')" prop="unitPrice">
+          <el-input-number
+            v-model="form.unitPrice"
+            :min="0"
+            :precision="2"
+            :step="0.5"
+            class="!w-full"
+            controls-position="right"
+          />
+        </el-form-item>
         <el-form-item :label="t('products.thumbnail')" prop="thumbnail">
           <el-input v-model="form.thumbnail" :placeholder="t('products.placeholders.thumbnail')" />
         </el-form-item>
@@ -156,18 +170,34 @@ type ApiProduct = {
   code: string
   nameEn: string
   nameKh: string
+  category?: string | CategoryOption
   unitPrice: number
   description?: string
   thumbnail?: string
+}
+
+type CategoryOption = {
+  _id: string
+  code?: string
+  nameEn: string
+  nameKh?: string
 }
 
 type ProductForm = {
   code: string
   nameEn: string
   nameKh: string
+  category: string
   unitPrice: number
   description: string
   thumbnail: string
+}
+
+type CategoryResponse = CategoryOption[] | {
+  data?: CategoryOption[] | { categories?: CategoryOption[]; items?: CategoryOption[]; docs?: CategoryOption[] }
+  categories?: CategoryOption[]
+  items?: CategoryOption[]
+  docs?: CategoryOption[]
 }
 
 type PaginatedResponse = {
@@ -193,13 +223,16 @@ const { hasPermission } = useAuth()
 
 const apiBaseUrl = computed(() => String(config.public.apiBaseUrl).replace(/\/$/, ''))
 const productsEndpoint = computed(() => `${apiBaseUrl.value}/master-data/products`)
+const categoriesEndpoint = computed(() => `${apiBaseUrl.value}/master-data/categories`)
 
 const search = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
 const totalItems = ref(0)
 const products = ref<ApiProduct[]>([])
+const categoryOptions = ref<CategoryOption[]>([])
 const isLoading = ref(false)
+const isLoadingCategories = ref(false)
 const isSaving = ref(false)
 const isDialogVisible = ref(false)
 const editingProductId = ref<string | null>(null)
@@ -209,6 +242,7 @@ const form = reactive<ProductForm>({
   code: '',
   nameEn: '',
   nameKh: '',
+  category: '',
   unitPrice: 0,
   description: '',
   thumbnail: ''
@@ -229,6 +263,9 @@ const rules: FormRules<ProductForm> = {
   nameKh: [
     { required: true, message: () => t('products.validation.nameKhRequired'), trigger: 'blur' }
   ],
+  category: [
+    { required: true, message: () => t('products.validation.categoryRequired'), trigger: 'change' }
+  ],
   unitPrice: [
     { required: true, message: () => t('products.validation.unitPriceRequired'), trigger: 'blur' },
     { type: 'number', min: 0, message: () => t('products.validation.unitPriceMin'), trigger: 'change' }
@@ -240,6 +277,23 @@ const requestHeaders = computed(() => ({
 }))
 
 const getProductId = (product: ApiProduct) => product._id || product.id || ''
+const getCategoryId = (category?: string | CategoryOption) => {
+  return typeof category === 'string' ? category : category?._id || ''
+}
+
+const getCategoryOptionLabel = (category: CategoryOption) => {
+  return category.code ? `${category.code} - ${category.nameEn}` : category.nameEn
+}
+
+const getCategoryLabel = (category?: string | CategoryOption) => {
+  const categoryId = getCategoryId(category)
+
+  if (typeof category === 'object' && category?.nameEn) {
+    return getCategoryOptionLabel(category)
+  }
+
+  return categoryOptions.value.find((item) => item._id === categoryId)?.nameEn || categoryId || '-'
+}
 
 const extractProducts = (response: ProductResponse): ApiProduct[] => {
   if (Array.isArray(response)) return response
@@ -251,6 +305,28 @@ const extractProducts = (response: ProductResponse): ApiProduct[] => {
   if (Array.isArray(response.items)) return response.items
   if (Array.isArray(response.docs)) return response.docs
   return []
+}
+
+const extractCategories = (response: CategoryResponse): CategoryOption[] => {
+  if (Array.isArray(response)) return response
+  if (Array.isArray(response.data)) return response.data
+  if (Array.isArray(response.data?.categories)) return response.data.categories
+  if (Array.isArray(response.data?.items)) return response.data.items
+  if (Array.isArray(response.data?.docs)) return response.data.docs
+  if (Array.isArray(response.categories)) return response.categories
+  if (Array.isArray(response.items)) return response.items
+  if (Array.isArray(response.docs)) return response.docs
+  return []
+}
+
+const ensureSelectedCategoryOption = (category?: string | CategoryOption) => {
+  if (!category || typeof category === 'string') return
+
+  const categoryId = getCategoryId(category)
+  const hasCategory = categoryOptions.value.some((item) => item._id === categoryId)
+  if (!hasCategory) {
+    categoryOptions.value = [...categoryOptions.value, category]
+  }
 }
 
 const getTotalItems = (response: ProductResponse, items: ApiProduct[]) => {
@@ -285,6 +361,26 @@ const formatPrice = (value: number) => {
   }).format(Number(value || 0))
 }
 
+const refreshCategoryOptions = async () => {
+  isLoadingCategories.value = true
+
+  try {
+    const response = await $fetch<CategoryResponse>(categoriesEndpoint.value, {
+      headers: requestHeaders.value,
+      query: {
+        page: 1,
+        limit: 1000
+      }
+    })
+
+    categoryOptions.value = extractCategories(response)
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error))
+  } finally {
+    isLoadingCategories.value = false
+  }
+}
+
 const refreshProducts = async () => {
   isLoading.value = true
 
@@ -313,6 +409,7 @@ const resetForm = () => {
     code: '',
     nameEn: '',
     nameKh: '',
+    category: '',
     unitPrice: 0,
     description: '',
     thumbnail: ''
@@ -335,10 +432,12 @@ const openEditDialog = (product: ApiProduct) => {
     code: product.code,
     nameEn: product.nameEn,
     nameKh: product.nameKh,
+    category: getCategoryId(product.category),
     unitPrice: Number(product.unitPrice || 0),
     description: product.description || '',
     thumbnail: product.thumbnail || ''
   })
+  ensureSelectedCategoryOption(product.category)
   isDialogVisible.value = true
 }
 
@@ -346,6 +445,7 @@ const buildPayload = (): ProductForm => ({
   code: form.code.trim(),
   nameEn: form.nameEn.trim(),
   nameKh: form.nameKh.trim(),
+  category: form.category,
   unitPrice: Number(form.unitPrice || 0),
   description: form.description.trim(),
   thumbnail: form.thumbnail.trim()
@@ -426,6 +526,7 @@ watch(search, () => {
 })
 
 onMounted(() => {
+  refreshCategoryOptions()
   refreshProducts()
 })
 </script>

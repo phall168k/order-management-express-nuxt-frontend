@@ -74,16 +74,12 @@
         label-position="top"
         @submit.prevent="submitCategory"
       >
-        <div class="grid gap-4 md:grid-cols-2">
-          <el-form-item :label="t('categories.code')" prop="code">
-            <el-input v-model="form.code" :placeholder="t('categories.placeholders.code')" />
-          </el-form-item>
-
-          <el-form-item :label="t('categories.nameEn')" prop="nameEn">
-            <el-input v-model="form.nameEn" :placeholder="t('categories.placeholders.nameEn')" />
-          </el-form-item>
-        </div>
-
+        <el-form-item :label="t('categories.code')" prop="code">
+          <el-input v-model="form.code" :placeholder="t('categories.placeholders.code')" />
+        </el-form-item>
+        <el-form-item :label="t('categories.nameEn')" prop="nameEn">
+          <el-input v-model="form.nameEn" :placeholder="t('categories.placeholders.nameEn')" />
+        </el-form-item>
         <el-form-item :label="t('categories.nameKh')" prop="nameKh">
           <el-input v-model="form.nameKh" :placeholder="t('categories.placeholders.nameKh')" />
         </el-form-item>
