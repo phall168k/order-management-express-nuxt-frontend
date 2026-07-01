@@ -10,6 +10,7 @@
     "products": "Products",
     "stocks": "Stock",
     "stockIns": "Stock in",
+    "stockAdjustments": "Stock adjustment",
     "userProfiles": "User profiles",
     "users": "Users",
     "roles": "Roles"
@@ -399,6 +400,54 @@
     "confirmDelete": {
       "title": "Delete stock in",
       "message": "Delete stock in entry for \"{product}\"?"
+    }
+  },
+  "stockAdjustments": {
+    "title": "Stock adjustment",
+    "description": "Record stock adjustment quantities by product and date.",
+    "stockAdjustmentDate": "Adjustment date",
+    "no": "No.",
+    "product": "Product",
+    "quantity": "Quantity",
+    "note": "Note",
+    "itemTitle": "Item {number}",
+    "itemCount": "{count} items",
+    "items": "Items",
+    "code": "Code",
+    "actions": {
+      "new": "New adjustment",
+      "create": "Create adjustment",
+      "edit": "Edit adjustment",
+      "save": "Save changes",
+      "delete": "Delete adjustment",
+      "addItem": "Add item",
+      "removeItem": "Remove item"
+    },
+    "dialog": {
+      "createTitle": "New stock adjustment",
+      "editTitle": "Edit stock adjustment"
+    },
+    "placeholders": {
+      "stockAdjustmentDate": "2026-07-01",
+      "product": "Select product",
+      "note": "Stock adjustment note"
+    },
+    "validation": {
+      "stockAdjustmentDateRequired": "Adjustment date is required",
+      "productRequired": "Product is required",
+      "productDuplicate": "This product is already selected in another item",
+      "quantityRequired": "Quantity is required",
+      "quantityMin": "Quantity must be at least 1"
+    },
+    "messages": {
+      "created": "Stock adjustment created",
+      "updated": "Stock adjustment updated",
+      "deleted": "Stock adjustment deleted",
+      "missingId": "This stock adjustment entry cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete stock adjustment",
+      "message": "Delete stock adjustment entry for \"{product}\"?"
     }
   }
 }

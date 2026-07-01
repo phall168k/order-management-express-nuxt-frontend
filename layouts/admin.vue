@@ -80,6 +80,7 @@ const menuItems = [
   { path: '/admin/master-data/product', label: 'menu.products', icon: 'lucide:package', permission: 'product.read' },
   { path: '/admin/inventory/stock', label: 'menu.stocks', icon: 'lucide:boxes', permission: 'stock.read' },
   { path: '/admin/inventory/stock-in', label: 'menu.stockIns', icon: 'lucide:package-plus', permission: 'stock-in.read' },
+  { path: '/admin/inventory/stock-adjustment', label: 'menu.stockAdjustments', icon: 'lucide:package-check', permission: 'stock-adjustment.read' },
   { path: '/admin/system/user-profile', label: 'menu.userProfiles', icon: 'lucide:id-card', permission: 'user-profile.read' },
   { path: '/admin/system/user', label: 'menu.users', icon: 'lucide:users', permission: 'user.read' },
   { path: '/admin/system/role', label: 'menu.roles', icon: 'lucide:shield-check', permission: 'role.read' },
@@ -90,7 +91,9 @@ const visibleMenuItems = computed(() => {
 })
 
 const currentTitle = computed(() => {
-  const activeItem = menuItems.find((item) => route.path.startsWith(item.path))
+  const activeItem = [...menuItems]
+    .sort((a, b) => b.path.length - a.path.length)
+    .find((item) => route.path.startsWith(item.path))
   return activeItem ? t(activeItem.label) : t('app.admin')
 })
 

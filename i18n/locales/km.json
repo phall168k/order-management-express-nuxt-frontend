@@ -10,6 +10,7 @@
     "products": "ទំនិញ",
     "stocks": "ស្តុក",
     "stockIns": "ស្តុកចូល",
+    "stockAdjustments": "កែតម្រូវស្តុក",
     "userProfiles": "ប្រវត្តិរូបអ្នកប្រើ",
     "users": "អ្នកប្រើប្រាស់",
     "roles": "តួនាទី"
@@ -399,6 +400,54 @@
     "confirmDelete": {
       "title": "លុបស្តុកចូល",
       "message": "លុបស្តុកចូលសម្រាប់ \"{product}\"?"
+    }
+  },
+  "stockAdjustments": {
+    "title": "កែតម្រូវស្តុក",
+    "description": "កត់ត្រាចំនួនកែតម្រូវស្តុកតាមទំនិញ និងកាលបរិច្ឆេទ។",
+    "stockAdjustmentDate": "ថ្ងៃកែតម្រូវ",
+    "no": "ល.រ",
+    "product": "ទំនិញ",
+    "quantity": "ចំនួន",
+    "note": "ចំណាំ",
+    "itemTitle": "ធាតុ {number}",
+    "itemCount": "{count} ធាតុ",
+    "items": "បញ្ជីធាតុ",
+    "code": "កូដ",
+    "actions": {
+      "new": "កែតម្រូវស្តុកថ្មី",
+      "create": "បង្កើតការកែតម្រូវ",
+      "edit": "កែប្រែការកែតម្រូវ",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបការកែតម្រូវ",
+      "addItem": "បន្ថែមធាតុ",
+      "removeItem": "ដកធាតុចេញ"
+    },
+    "dialog": {
+      "createTitle": "កែតម្រូវស្តុកថ្មី",
+      "editTitle": "កែប្រែការកែតម្រូវស្តុក"
+    },
+    "placeholders": {
+      "stockAdjustmentDate": "2026-07-01",
+      "product": "ជ្រើសរើសទំនិញ",
+      "note": "Stock adjustment note"
+    },
+    "validation": {
+      "stockAdjustmentDateRequired": "ត្រូវការថ្ងៃកែតម្រូវ",
+      "productRequired": "ត្រូវការទំនិញ",
+      "productDuplicate": "ទំនិញនេះត្រូវបានជ្រើសរើសរួចហើយនៅក្នុងធាតុផ្សេង",
+      "quantityRequired": "ត្រូវការចំនួន",
+      "quantityMin": "ចំនួនត្រូវមានយ៉ាងតិច ១"
+    },
+    "messages": {
+      "created": "បានបង្កើតការកែតម្រូវស្តុក",
+      "updated": "បានកែប្រែការកែតម្រូវស្តុក",
+      "deleted": "បានលុបការកែតម្រូវស្តុក",
+      "missingId": "មិនអាចលុបការកែតម្រូវស្តុកនេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបការកែតម្រូវស្តុក",
+      "message": "លុបការកែតម្រូវស្តុកសម្រាប់ \"{product}\"?"
     }
   }
 }
