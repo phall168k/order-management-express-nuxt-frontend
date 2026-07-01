@@ -76,6 +76,8 @@ const selectedLocale = ref(locale.value)
 
 const menuItems = [
   { path: '/admin/dashboard', label: 'menu.dashboard', icon: 'lucide:layout-dashboard' },
+  { path: '/admin/master-data/category', label: 'menu.categories', icon: 'lucide:tags', permission: 'category.read' },
+  { path: '/admin/master-data/product', label: 'menu.products', icon: 'lucide:package', permission: 'product.read' },
   { path: '/admin/system/user', label: 'menu.users', icon: 'lucide:users', permission: 'user.read' },
   { path: '/admin/system/role', label: 'menu.roles', icon: 'lucide:shield-check', permission: 'role.read' },
 ]

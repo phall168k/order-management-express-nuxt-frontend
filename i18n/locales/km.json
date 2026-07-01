@@ -6,6 +6,8 @@
   },
   "menu": {
     "dashboard": "ផ្ទាំងសង្ខេប",
+    "categories": "ប្រភេទទំនិញ",
+    "products": "ទំនិញ",
     "users": "អ្នកប្រើប្រាស់",
     "roles": "តួនាទី"
   },
@@ -13,6 +15,8 @@
     "search": "ស្វែងរក",
     "status": "ស្ថានភាព",
     "date": "កាលបរិច្ឆេទ",
+    "description": "ការពិពណ៌នា",
+    "createdBy": "បង្កើតដោយ",
     "actions": "សកម្មភាព",
     "cancel": "បោះបង់",
     "yes": "បាទ/ចាស",
@@ -143,6 +147,89 @@
     "status": {
       "enabled": "បើក",
       "disabled": "បិទ"
+    }
+  },
+  "categories": {
+    "title": "គ្រប់គ្រងប្រភេទទំនិញ",
+    "description": "គ្រប់គ្រងប្រភេទទំនិញ និងឈ្មោះបង្ហាញ។",
+    "code": "កូដ",
+    "nameEn": "ឈ្មោះ (EN)",
+    "nameKh": "ឈ្មោះ (KH)",
+    "actions": {
+      "new": "ប្រភេទថ្មី",
+      "create": "បង្កើតប្រភេទ",
+      "edit": "កែប្រែប្រភេទ",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបប្រភេទ"
+    },
+    "dialog": {
+      "createTitle": "ប្រភេទថ្មី",
+      "editTitle": "កែប្រែប្រភេទ"
+    },
+    "placeholders": {
+      "code": "FOOD",
+      "nameEn": "Food",
+      "nameKh": "Food KH",
+      "description": "Food products"
+    },
+    "validation": {
+      "codeRequired": "ត្រូវការកូដ",
+      "nameEnRequired": "ត្រូវការឈ្មោះអង់គ្លេស",
+      "nameKhRequired": "ត្រូវការឈ្មោះខ្មែរ"
+    },
+    "messages": {
+      "created": "បានបង្កើតប្រភេទ",
+      "updated": "បានកែប្រែប្រភេទ",
+      "deleted": "បានលុបប្រភេទ",
+      "missingId": "មិនអាចលុបប្រភេទនេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបប្រភេទ",
+      "message": "លុបប្រភេទ \"{code}\"?"
+    }
+  },
+  "products": {
+    "title": "គ្រប់គ្រងទំនិញ",
+    "description": "គ្រប់គ្រងព័ត៌មាន និងតម្លៃទំនិញ។",
+    "code": "កូដ",
+    "nameEn": "ឈ្មោះ (EN)",
+    "nameKh": "ឈ្មោះ (KH)",
+    "unitPrice": "តម្លៃឯកតា",
+    "thumbnail": "រូបភាព",
+    "actions": {
+      "new": "ទំនិញថ្មី",
+      "create": "បង្កើតទំនិញ",
+      "edit": "កែប្រែទំនិញ",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបទំនិញ"
+    },
+    "dialog": {
+      "createTitle": "ទំនិញថ្មី",
+      "editTitle": "កែប្រែទំនិញ"
+    },
+    "placeholders": {
+      "code": "PROD-001",
+      "nameEn": "Sample Product",
+      "nameKh": "Sample Product KH",
+      "thumbnail": "uploads/products/sample-product.jpg",
+      "description": "Sample product description"
+    },
+    "validation": {
+      "codeRequired": "ត្រូវការកូដ",
+      "nameEnRequired": "ត្រូវការឈ្មោះអង់គ្លេស",
+      "nameKhRequired": "ត្រូវការឈ្មោះខ្មែរ",
+      "unitPriceRequired": "ត្រូវការតម្លៃឯកតា",
+      "unitPriceMin": "តម្លៃឯកតាមិនអាចតិចជាងសូន្យ"
+    },
+    "messages": {
+      "created": "បានបង្កើតទំនិញ",
+      "updated": "បានកែប្រែទំនិញ",
+      "deleted": "បានលុបទំនិញ",
+      "missingId": "មិនអាចលុបទំនិញនេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបទំនិញ",
+      "message": "លុបទំនិញ \"{code}\"?"
     }
   }
 }

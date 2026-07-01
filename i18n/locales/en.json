@@ -6,6 +6,8 @@
   },
   "menu": {
     "dashboard": "Dashboard",
+    "categories": "Categories",
+    "products": "Products",
     "users": "Users",
     "roles": "Roles"
   },
@@ -13,6 +15,8 @@
     "search": "Search",
     "status": "Status",
     "date": "Date",
+    "description": "Description",
+    "createdBy": "Created by",
     "actions": "Actions",
     "cancel": "Cancel",
     "yes": "Yes",
@@ -143,6 +147,89 @@
     "status": {
       "enabled": "Enabled",
       "disabled": "Disabled"
+    }
+  },
+  "categories": {
+    "title": "Category management",
+    "description": "Manage product categories and display names.",
+    "code": "Code",
+    "nameEn": "Name (EN)",
+    "nameKh": "Name (KH)",
+    "actions": {
+      "new": "New category",
+      "create": "Create category",
+      "edit": "Edit category",
+      "save": "Save changes",
+      "delete": "Delete category"
+    },
+    "dialog": {
+      "createTitle": "New category",
+      "editTitle": "Edit category"
+    },
+    "placeholders": {
+      "code": "FOOD",
+      "nameEn": "Food",
+      "nameKh": "Food KH",
+      "description": "Food products"
+    },
+    "validation": {
+      "codeRequired": "Code is required",
+      "nameEnRequired": "English name is required",
+      "nameKhRequired": "Khmer name is required"
+    },
+    "messages": {
+      "created": "Category created",
+      "updated": "Category updated",
+      "deleted": "Category deleted",
+      "missingId": "This category cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete category",
+      "message": "Delete category \"{code}\"?"
+    }
+  },
+  "products": {
+    "title": "Product management",
+    "description": "Manage product catalog details and pricing.",
+    "code": "Code",
+    "nameEn": "Name (EN)",
+    "nameKh": "Name (KH)",
+    "unitPrice": "Unit price",
+    "thumbnail": "Thumbnail",
+    "actions": {
+      "new": "New product",
+      "create": "Create product",
+      "edit": "Edit product",
+      "save": "Save changes",
+      "delete": "Delete product"
+    },
+    "dialog": {
+      "createTitle": "New product",
+      "editTitle": "Edit product"
+    },
+    "placeholders": {
+      "code": "PROD-001",
+      "nameEn": "Sample Product",
+      "nameKh": "Sample Product KH",
+      "thumbnail": "uploads/products/sample-product.jpg",
+      "description": "Sample product description"
+    },
+    "validation": {
+      "codeRequired": "Code is required",
+      "nameEnRequired": "English name is required",
+      "nameKhRequired": "Khmer name is required",
+      "unitPriceRequired": "Unit price is required",
+      "unitPriceMin": "Unit price cannot be negative"
+    },
+    "messages": {
+      "created": "Product created",
+      "updated": "Product updated",
+      "deleted": "Product deleted",
+      "missingId": "This product cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete product",
+      "message": "Delete product \"{code}\"?"
     }
   }
 }
