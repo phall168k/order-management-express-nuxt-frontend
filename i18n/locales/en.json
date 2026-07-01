@@ -268,6 +268,7 @@
     "nameKh": "Name (KH)",
     "category": "Category",
     "unitPrice": "Unit price",
+    "discount": "Discount",
     "thumbnail": "Thumbnail",
     "actions": {
       "new": "New product",
@@ -294,7 +295,10 @@
       "nameKhRequired": "Khmer name is required",
       "categoryRequired": "Category is required",
       "unitPriceRequired": "Unit price is required",
-      "unitPriceMin": "Unit price cannot be negative"
+      "unitPriceMin": "Unit price cannot be negative",
+      "discountRequired": "Discount is required",
+      "discountMin": "Discount cannot be negative",
+      "discountMax": "Discount cannot be greater than unit price"
     },
     "messages": {
       "created": "Product created",

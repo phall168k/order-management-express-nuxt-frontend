@@ -47,6 +47,11 @@
             {{ formatPrice(row.unitPrice) }}
           </template>
         </el-table-column>
+        <el-table-column :label="t('products.discount')" min-width="130">
+          <template #default="{ row }">
+            {{ formatPrice(row.discount) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="description" :label="t('common.description')" min-width="240" show-overflow-tooltip />
         <el-table-column v-if="canUpdateProduct || canDeleteProduct" fixed="right" :label="t('common.actions')" width="130">
           <template #default="{ row }">
@@ -128,6 +133,17 @@
             controls-position="right"
           />
         </el-form-item>
+        <el-form-item :label="t('products.discount')" prop="discount">
+          <el-input-number
+            v-model="form.discount"
+            :min="0"
+            :max="form.unitPrice"
+            :precision="2"
+            :step="0.5"
+            class="!w-full"
+            controls-position="right"
+          />
+        </el-form-item>
         <el-form-item :label="t('products.thumbnail')" prop="thumbnail">
           <el-input v-model="form.thumbnail" :placeholder="t('products.placeholders.thumbnail')" />
         </el-form-item>
@@ -172,6 +188,7 @@ type ApiProduct = {
   nameKh: string
   category?: string | CategoryOption
   unitPrice: number
+  discount?: number
   description?: string
   thumbnail?: string
 }
@@ -189,6 +206,7 @@ type ProductForm = {
   nameKh: string
   category: string
   unitPrice: number
+  discount: number
   description: string
   thumbnail: string
 }
@@ -244,6 +262,7 @@ const form = reactive<ProductForm>({
   nameKh: '',
   category: '',
   unitPrice: 0,
+  discount: 0,
   description: '',
   thumbnail: ''
 })
@@ -252,6 +271,15 @@ const isEditing = computed(() => Boolean(editingProductId.value))
 const canCreateProduct = computed(() => hasPermission('product.create'))
 const canUpdateProduct = computed(() => hasPermission('product.update'))
 const canDeleteProduct = computed(() => hasPermission('product.delete'))
+
+const validateDiscount = (_rule: unknown, value: number, callback: (error?: Error) => void) => {
+  if (Number(value || 0) > Number(form.unitPrice || 0)) {
+    callback(new Error(t('products.validation.discountMax')))
+    return
+  }
+
+  callback()
+}
 
 const rules: FormRules<ProductForm> = {
   code: [
@@ -269,6 +297,11 @@ const rules: FormRules<ProductForm> = {
   unitPrice: [
     { required: true, message: () => t('products.validation.unitPriceRequired'), trigger: 'blur' },
     { type: 'number', min: 0, message: () => t('products.validation.unitPriceMin'), trigger: 'change' }
+  ],
+  discount: [
+    { required: true, message: () => t('products.validation.discountRequired'), trigger: 'blur' },
+    { type: 'number', min: 0, message: () => t('products.validation.discountMin'), trigger: 'change' },
+    { validator: validateDiscount, trigger: 'change' }
   ]
 }
 
@@ -393,7 +426,8 @@ const refreshProducts = async () => {
     const items = extractProducts(response)
     products.value = items.map((product) => ({
       ...product,
-      unitPrice: Number(product.unitPrice || 0)
+      unitPrice: Number(product.unitPrice || 0),
+      discount: Number(product.discount || 0)
     }))
     totalItems.value = getTotalItems(response, items)
   } catch (error) {
@@ -411,6 +445,7 @@ const resetForm = () => {
     nameKh: '',
     category: '',
     unitPrice: 0,
+    discount: 0,
     description: '',
     thumbnail: ''
   })
@@ -434,6 +469,7 @@ const openEditDialog = (product: ApiProduct) => {
     nameKh: product.nameKh,
     category: getCategoryId(product.category),
     unitPrice: Number(product.unitPrice || 0),
+    discount: Number(product.discount || 0),
     description: product.description || '',
     thumbnail: product.thumbnail || ''
   })
@@ -447,6 +483,7 @@ const buildPayload = (): ProductForm => ({
   nameKh: form.nameKh.trim(),
   category: form.category,
   unitPrice: Number(form.unitPrice || 0),
+  discount: Number(form.discount || 0),
   description: form.description.trim(),
   thumbnail: form.thumbnail.trim()
 })
