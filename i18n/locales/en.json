@@ -11,6 +11,7 @@
     "stocks": "Stock",
     "stockIns": "Stock in",
     "stockAdjustments": "Stock adjustment",
+    "sales": "Sales",
     "paymentMethods": "Payment methods",
     "userProfiles": "User profiles",
     "users": "Users",
@@ -310,6 +311,88 @@
     "confirmDelete": {
       "title": "Delete product",
       "message": "Delete product \"{code}\"?"
+    }
+  },
+  "sales": {
+    "title": "Sales",
+    "description": "Record customer sales, payment method, and sale line items.",
+    "code": "Sale code",
+    "customer": "Customer",
+    "salingDate": "Sale date",
+    "paymentMethod": "Payment method",
+    "address": "Address",
+    "note": "Note",
+    "items": "Items",
+    "no": "No.",
+    "product": "Product",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "discount": "Discount",
+    "stockOnHand": "Stock on hand",
+    "lineTotal": "Line total",
+    "total": "Total",
+    "totalAmount": "Total amount",
+    "amountAfterDiscount": "Amount after discount",
+    "itemCount": "Items",
+    "status": {
+      "label": "Status",
+      "pending": "Pending",
+      "packing": "Packing",
+      "shipping": "shipping",
+      "delivered": "Delivered",
+      "completed": "Completed"
+    },
+    "actions": {
+      "new": "New sale",
+      "create": "Create sale",
+      "edit": "Edit sale",
+      "save": "Save changes",
+      "delete": "Delete sale",
+      "addItem": "Add item",
+      "removeItem": "Remove item"
+    },
+    "dialog": {
+      "createTitle": "New sale",
+      "editTitle": "Edit sale"
+    },
+    "placeholders": {
+      "code": "SALE-001",
+      "customer": "Select customer",
+      "salingDate": "2026-07-01 10:00",
+      "status": "Select status",
+      "paymentMethod": "Select payment method",
+      "address": "Phnom Penh",
+      "note": "Sale note",
+      "product": "Select product",
+      "itemNote": "Item note"
+    },
+    "validation": {
+      "codeRequired": "Sale code is required",
+      "customerRequired": "Customer is required",
+      "salingDateRequired": "Sale date is required",
+      "statusRequired": "Status is required",
+      "paymentMethodRequired": "Payment method is required",
+      "addressRequired": "Address is required",
+      "productRequired": "Product is required",
+      "productDuplicate": "This product is already selected in another item",
+      "quantityRequired": "Quantity is required",
+      "quantityMin": "Quantity must be at least 1",
+      "quantityMaxStock": "Quantity cannot be greater than stock on hand ({stockOnHand})",
+      "unitPriceRequired": "Unit price is required",
+      "unitPriceMin": "Unit price cannot be negative",
+      "discountRequired": "Discount is required",
+      "discountMin": "Discount cannot be negative",
+      "discountMax": "Discount cannot be greater than unit price"
+    },
+    "messages": {
+      "created": "Sale created",
+      "updated": "Sale updated",
+      "deleted": "Sale deleted",
+      "missingId": "This sale cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete sale",
+      "message": "Delete sale \"{code}\"?"
     }
   },
   "paymentMethods": {

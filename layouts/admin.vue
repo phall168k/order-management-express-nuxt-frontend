@@ -81,6 +81,7 @@ const menuItems = [
   { path: '/admin/inventory/stock', label: 'menu.stocks', icon: 'lucide:boxes', permission: 'stock.read' },
   { path: '/admin/inventory/stock-in', label: 'menu.stockIns', icon: 'lucide:package-plus', permission: 'stock-in.read' },
   { path: '/admin/inventory/stock-adjustment', label: 'menu.stockAdjustments', icon: 'lucide:package-check', permission: 'stock-adjustment.read' },
+  { path: '/admin/saling/sale', label: 'menu.sales', icon: 'lucide:shopping-cart', permission: 'sale.read' },
   { path: '/admin/system/payment-method', label: 'menu.paymentMethods', icon: 'lucide:credit-card', permission: 'payment-method.read' },
   { path: '/admin/system/user-profile', label: 'menu.userProfiles', icon: 'lucide:id-card', permission: 'user-profile.read' },
   { path: '/admin/system/user', label: 'menu.users', icon: 'lucide:users', permission: 'user.read' },

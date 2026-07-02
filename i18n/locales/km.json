@@ -11,6 +11,7 @@
     "stocks": "ស្តុក",
     "stockIns": "ស្តុកចូល",
     "stockAdjustments": "កែតម្រូវស្តុក",
+    "sales": "ការលក់",
     "paymentMethods": "វិធីបង់ប្រាក់",
     "userProfiles": "ប្រវត្តិរូបអ្នកប្រើ",
     "users": "អ្នកប្រើប្រាស់",
@@ -310,6 +311,88 @@
     "confirmDelete": {
       "title": "លុបទំនិញ",
       "message": "លុបទំនិញ \"{code}\"?"
+    }
+  },
+  "sales": {
+    "title": "ការលក់",
+    "description": "កត់ត្រាការលក់តាមអតិថិជន វិធីបង់ប្រាក់ និងបញ្ជីទំនិញ។",
+    "code": "កូដការលក់",
+    "customer": "អតិថិជន",
+    "salingDate": "ថ្ងៃលក់",
+    "paymentMethod": "វិធីបង់ប្រាក់",
+    "address": "អាសយដ្ឋាន",
+    "note": "ចំណាំ",
+    "items": "បញ្ជីទំនិញ",
+    "no": "ល.រ",
+    "product": "ទំនិញ",
+    "quantity": "ចំនួន",
+    "unitPrice": "តម្លៃឯកតា",
+    "discount": "បញ្ចុះតម្លៃ",
+    "stockOnHand": "ស្តុកនៅក្នុងដៃ",
+    "lineTotal": "សរុបជួរ",
+    "total": "សរុប",
+    "totalAmount": "ចំនួនសរុប",
+    "amountAfterDiscount": "ចំនួនបន្ទាប់ពីបញ្ចុះតម្លៃ",
+    "itemCount": "ចំនួនធាតុ",
+    "status": {
+      "label": "ស្ថានភាព",
+      "pending": "រង់ចាំ",
+      "packing": "កំពុងវេចខ្ចប់",
+      "shipping": "កំពុងដឹក",
+      "delivered": "បានមកដល់",
+      "completed": "ជោគជ័យ"
+    },
+    "actions": {
+      "new": "ការលក់ថ្មី",
+      "create": "បង្កើតការលក់",
+      "edit": "កែប្រែការលក់",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបការលក់",
+      "addItem": "បន្ថែមធាតុ",
+      "removeItem": "ដកធាតុចេញ"
+    },
+    "dialog": {
+      "createTitle": "ការលក់ថ្មី",
+      "editTitle": "កែប្រែការលក់"
+    },
+    "placeholders": {
+      "code": "SALE-001",
+      "customer": "ជ្រើសរើសអតិថិជន",
+      "salingDate": "2026-07-01 10:00",
+      "status": "ជ្រើសរើសស្ថានភាព",
+      "paymentMethod": "ជ្រើសរើសវិធីបង់ប្រាក់",
+      "address": "Phnom Penh",
+      "note": "Sale note",
+      "product": "ជ្រើសរើសទំនិញ",
+      "itemNote": "Item note"
+    },
+    "validation": {
+      "codeRequired": "ត្រូវការកូដការលក់",
+      "customerRequired": "ត្រូវការអតិថិជន",
+      "salingDateRequired": "ត្រូវការថ្ងៃលក់",
+      "statusRequired": "ត្រូវការស្ថានភាព",
+      "paymentMethodRequired": "ត្រូវការវិធីបង់ប្រាក់",
+      "addressRequired": "ត្រូវការអាសយដ្ឋាន",
+      "productRequired": "ត្រូវការទំនិញ",
+      "productDuplicate": "ទំនិញនេះត្រូវបានជ្រើសរើសរួចហើយនៅក្នុងធាតុផ្សេង",
+      "quantityRequired": "ត្រូវការចំនួន",
+      "quantityMin": "ចំនួនត្រូវមានយ៉ាងតិច ១",
+      "quantityMaxStock": "ចំនួនមិនអាចធំជាងស្តុកនៅក្នុងដៃ ({stockOnHand})",
+      "unitPriceRequired": "ត្រូវការតម្លៃឯកតា",
+      "unitPriceMin": "តម្លៃឯកតាមិនអាចតិចជាងសូន្យ",
+      "discountRequired": "ត្រូវការបញ្ចុះតម្លៃ",
+      "discountMin": "បញ្ចុះតម្លៃមិនអាចតិចជាងសូន្យ",
+      "discountMax": "បញ្ចុះតម្លៃមិនអាចធំជាងតម្លៃឯកតា"
+    },
+    "messages": {
+      "created": "បានបង្កើតការលក់",
+      "updated": "បានកែប្រែការលក់",
+      "deleted": "បានលុបការលក់",
+      "missingId": "មិនអាចលុបការលក់នេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបការលក់",
+      "message": "លុបការលក់ \"{code}\"?"
     }
   },
   "paymentMethods": {
