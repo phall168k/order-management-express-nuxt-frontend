@@ -11,6 +11,7 @@
     "stocks": "ស្តុក",
     "stockIns": "ស្តុកចូល",
     "stockAdjustments": "កែតម្រូវស្តុក",
+    "banners": "បេនន័រ",
     "sales": "ការលក់",
     "paymentMethods": "វិធីបង់ប្រាក់",
     "userProfiles": "ប្រវត្តិរូបអ្នកប្រើ",
@@ -311,6 +312,50 @@
     "confirmDelete": {
       "title": "លុបទំនិញ",
       "message": "លុបទំនិញ \"{code}\"?"
+    }
+  },
+  "banners": {
+    "title": "គ្រប់គ្រងបេនន័រ",
+    "description": "គ្រប់គ្រងបេនន័រការ៉ូសែលលើទំព័រហាង និងស្ថានភាពបង្ហាញ។",
+    "thumbnail": "រូបភាព",
+    "bannerTitle": "ចំណងជើង",
+    "product": "ទំនិញ",
+    "isActive": "សកម្ម",
+    "status": {
+      "active": "សកម្ម",
+      "inactive": "អសកម្ម"
+    },
+    "actions": {
+      "new": "បេនន័រថ្មី",
+      "create": "បង្កើតបេនន័រ",
+      "edit": "កែប្រែបេនន័រ",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបបេនន័រ"
+    },
+    "dialog": {
+      "createTitle": "បេនន័រថ្មី",
+      "editTitle": "កែប្រែបេនន័រ"
+    },
+    "placeholders": {
+      "title": "ការបញ្ចុះតម្លៃថ្មីសម្រាប់សប្តាហ៍នេះ",
+      "product": "ជ្រើសរើសទំនិញ",
+      "thumbnail": "uploads/banners/summer-sale.jpg",
+      "description": "ផ្សព្វផ្សាយការផ្តល់ជូនតាមរដូវ និងទំនិញពិសេស។"
+    },
+    "validation": {
+      "titleRequired": "ត្រូវការចំណងជើង",
+      "productRequired": "ត្រូវការទំនិញ",
+      "thumbnailRequired": "ត្រូវការរូបភាព"
+    },
+    "messages": {
+      "created": "បានបង្កើតបេនន័រ",
+      "updated": "បានកែប្រែបេនន័រ",
+      "deleted": "បានលុបបេនន័រ",
+      "missingId": "មិនអាចលុបបេនន័រនេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបបេនន័រ",
+      "message": "លុបបេនន័រ \"{title}\"?"
     }
   },
   "sales": {

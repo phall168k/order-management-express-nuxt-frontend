@@ -11,6 +11,7 @@
     "stocks": "Stock",
     "stockIns": "Stock in",
     "stockAdjustments": "Stock adjustment",
+    "banners": "Banners",
     "sales": "Sales",
     "paymentMethods": "Payment methods",
     "userProfiles": "User profiles",
@@ -311,6 +312,50 @@
     "confirmDelete": {
       "title": "Delete product",
       "message": "Delete product \"{code}\"?"
+    }
+  },
+  "banners": {
+    "title": "Banner management",
+    "description": "Manage storefront carousel banners and visibility.",
+    "thumbnail": "Thumbnail",
+    "bannerTitle": "Title",
+    "product": "Product",
+    "isActive": "Active",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "new": "New banner",
+      "create": "Create banner",
+      "edit": "Edit banner",
+      "save": "Save changes",
+      "delete": "Delete banner"
+    },
+    "dialog": {
+      "createTitle": "New banner",
+      "editTitle": "Edit banner"
+    },
+    "placeholders": {
+      "title": "Fresh deals for the week",
+      "product": "Select product",
+      "thumbnail": "uploads/banners/summer-sale.jpg",
+      "description": "Promote seasonal offers and featured products."
+    },
+    "validation": {
+      "titleRequired": "Title is required",
+      "productRequired": "Product is required",
+      "thumbnailRequired": "Thumbnail is required"
+    },
+    "messages": {
+      "created": "Banner created",
+      "updated": "Banner updated",
+      "deleted": "Banner deleted",
+      "missingId": "This banner cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete banner",
+      "message": "Delete banner \"{title}\"?"
     }
   },
   "sales": {
