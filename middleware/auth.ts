@@ -1,10 +1,15 @@
 export default defineNuxtRouteMiddleware((to) => {
-  const { isAuthenticated, clearAuth, hasPermission } = useAuth()
+  const { user, isAuthenticated, clearAuth, hasPermission } = useAuth()
   const requiredPermission = to.meta.permission as string | string[] | undefined
+  const publicAuthPages = ['/auth/login', '/auth/register']
+  const isCustomerUser = computed(() => {
+    if (user.value?.isSuperUser) return false
+    return user.value?.roles?.some((role) => role.name?.toLowerCase() === 'customer') ?? false
+  })
 
-  if (to.path === '/auth/login') {
+  if (publicAuthPages.includes(to.path)) {
     if (isAuthenticated.value) {
-      return navigateTo('/admin/dashboard')
+      return navigateTo(isCustomerUser.value ? '/' : '/admin/dashboard')
     }
 
     return
@@ -13,6 +18,10 @@ export default defineNuxtRouteMiddleware((to) => {
   if (!isAuthenticated.value) {
     clearAuth()
     return navigateTo('/auth/login')
+  }
+
+  if (isCustomerUser.value && to.path.startsWith('/admin')) {
+    return navigateTo('/')
   }
 
   if (!hasPermission(requiredPermission)) {

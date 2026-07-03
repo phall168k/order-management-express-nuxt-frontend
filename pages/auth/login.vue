@@ -57,6 +57,16 @@
           Login
         </el-button>
       </el-form>
+
+      <div class="mt-5 border-t border-slate-200 pt-5">
+        <p class="text-center text-sm text-slate-500">Need a customer account?</p>
+        <NuxtLink
+          to="/auth/register"
+          class="mt-3 flex h-10 w-full items-center justify-center rounded-md border border-emerald-200 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 hover:text-emerald-800"
+        >
+          Create account
+        </NuxtLink>
+      </div>
     </section>
   </div>
 </template>
@@ -117,6 +127,11 @@ const rules: FormRules<typeof form> = {
 
 const apiBaseUrl = computed(() => String(config.public.apiBaseUrl).replace(/\/$/, ''))
 
+const isCustomerUser = (user?: LoginResponse['data']) => {
+  if (!user || user.isSuperUser) return false
+  return user.roles?.some((role) => role.name?.toLowerCase() === 'customer') ?? false
+}
+
 const getErrorMessage = (error: unknown) => {
   if (typeof error === 'object' && error !== null && 'data' in error) {
     const data = (error as { data?: { message?: string; error?: string } }).data
@@ -149,7 +164,7 @@ const submitLogin = async () => {
     }
 
     ElMessage.success(response.message || 'Login successful')
-    await navigateTo('/admin/dashboard')
+    await navigateTo(isCustomerUser(response.data) ? '/' : '/admin/dashboard')
   } catch (error) {
     ElMessage.error(getErrorMessage(error))
   } finally {
