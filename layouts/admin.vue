@@ -22,7 +22,9 @@
           router
         >
           <el-menu-item v-for="item in visibleMenuItems" :key="item.path" :index="item.path">
-            <Icon :name="item.icon" class="h-5 w-5" />
+            <el-icon class="menu-icon">
+              <Icon :name="item.icon" />
+            </el-icon>
             <template #title>{{ t(item.label) }}</template>
           </el-menu-item>
         </el-menu>
@@ -136,6 +138,13 @@ const logout = async () => {
   border-radius: 8px;
   gap: 12px;
   margin-bottom: 4px;
+}
+
+:deep(.admin-menu .menu-icon) {
+  height: 20px;
+  width: 20px;
+  margin-right: 0;
+  font-size: 20px;
 }
 
 :deep(.admin-menu .el-menu-item.is-active) {
