@@ -21,6 +21,16 @@
 
     <div class="p-5">
       <el-table v-loading="isLoading" :data="categories" stripe class="w-full">
+        <el-table-column :label="t('categories.icon')" width="96">
+          <template #default="{ row }">
+            <div class="flex items-center gap-2">
+              <div class="grid h-9 w-9 place-items-center rounded border border-slate-200 bg-slate-50">
+                <Icon v-if="row.icon" :name="row.icon" class="h-5 w-5 text-emerald-600" />
+                <Icon v-else name="lucide:tags" class="h-5 w-5 text-slate-400" />
+              </div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="code" :label="t('categories.code')" min-width="130" />
         <el-table-column prop="nameEn" :label="t('categories.nameEn')" min-width="180" />
         <el-table-column prop="nameKh" :label="t('categories.nameKh')" min-width="180" />
@@ -83,6 +93,13 @@
         <el-form-item :label="t('categories.nameKh')" prop="nameKh">
           <el-input v-model="form.nameKh" :placeholder="t('categories.placeholders.nameKh')" />
         </el-form-item>
+        <el-form-item :label="t('categories.icon')" prop="icon">
+          <el-input v-model="form.icon" :placeholder="t('categories.placeholders.icon')">
+            <template #prefix>
+              <Icon :name="form.icon || 'lucide:tags'" class="h-4 w-4 text-slate-400" />
+            </template>
+          </el-input>
+        </el-form-item>
 
         <el-form-item :label="t('common.description')" prop="description">
           <el-input
@@ -128,6 +145,7 @@ type ApiCategory = {
   code: string
   nameEn: string
   nameKh: string
+  icon?: string
   description?: string
   createdByUser?: CreatedByUser
 }
@@ -136,6 +154,7 @@ type CategoryForm = {
   code: string
   nameEn: string
   nameKh: string
+  icon: string
   description: string
 }
 
@@ -178,6 +197,7 @@ const form = reactive<CategoryForm>({
   code: '',
   nameEn: '',
   nameKh: '',
+  icon: '',
   description: ''
 })
 
@@ -261,6 +281,7 @@ const resetForm = () => {
     code: '',
     nameEn: '',
     nameKh: '',
+    icon: '',
     description: ''
   })
   categoryFormRef.value?.clearValidate()
@@ -281,6 +302,7 @@ const openEditDialog = (category: ApiCategory) => {
     code: category.code,
     nameEn: category.nameEn,
     nameKh: category.nameKh,
+    icon: category.icon || '',
     description: category.description || ''
   })
   isDialogVisible.value = true
@@ -290,6 +312,7 @@ const buildPayload = (): CategoryForm => ({
   code: form.code.trim(),
   nameEn: form.nameEn.trim(),
   nameKh: form.nameKh.trim(),
+  icon: form.icon.trim(),
   description: form.description.trim()
 })
 

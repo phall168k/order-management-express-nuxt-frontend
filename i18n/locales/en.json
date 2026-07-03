@@ -230,6 +230,7 @@
     "code": "Code",
     "nameEn": "Name (EN)",
     "nameKh": "Name (KH)",
+    "icon": "Icon",
     "actions": {
       "new": "New category",
       "create": "Create category",
@@ -245,6 +246,7 @@
       "code": "FOOD",
       "nameEn": "Food",
       "nameKh": "Food KH",
+      "icon": "lucide:utensils",
       "description": "Food products"
     },
     "validation": {
