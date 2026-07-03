@@ -91,6 +91,80 @@
     <main>
       <slot />
     </main>
+
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-8">
+        <div>
+          <NuxtLink to="/" class="inline-flex items-center gap-2">
+            <span class="grid h-10 w-10 place-items-center rounded-lg bg-emerald-700 text-white">
+              <Icon name="lucide:shopping-bag" class="h-6 w-6" />
+            </span>
+            <span class="text-lg font-bold text-emerald-800">OrderMart</span>
+          </NuxtLink>
+          <p class="mt-4 max-w-sm text-sm leading-6 text-slate-600">
+            Fast ordering for daily essentials, fresh stock, and simple product discovery.
+          </p>
+          <div class="mt-5 flex items-center gap-2">
+            <a
+              v-for="social in socialLinks"
+              :key="social.label"
+              :href="social.href"
+              class="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+              :aria-label="social.label"
+            >
+              <Icon :name="social.icon" class="h-4 w-4" />
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold text-slate-950">Shop</h3>
+          <ul class="mt-4 space-y-3 text-sm text-slate-600">
+            <li v-for="item in footerShopLinks" :key="item.to">
+              <NuxtLink :to="item.to" class="transition hover:text-emerald-700">{{ item.label }}</NuxtLink>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold text-slate-950">Support</h3>
+          <ul class="mt-4 space-y-3 text-sm text-slate-600">
+            <li v-for="item in footerSupportLinks" :key="item.to">
+              <NuxtLink :to="item.to" class="transition hover:text-emerald-700">{{ item.label }}</NuxtLink>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold text-slate-950">Contact</h3>
+          <ul class="mt-4 space-y-3 text-sm text-slate-600">
+            <li class="flex gap-2">
+              <Icon name="lucide:map-pin" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+              <span>Phnom Penh, Cambodia</span>
+            </li>
+            <li class="flex gap-2">
+              <Icon name="lucide:phone" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+              <a class="transition hover:text-emerald-700" href="tel:+85512345678">+855 12 345 678</a>
+            </li>
+            <li class="flex gap-2">
+              <Icon name="lucide:mail" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+              <a class="transition hover:text-emerald-700" href="mailto:support@ordermart.local">support@ordermart.local</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-200">
+        <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+          <p>© {{ currentYear }} OrderMart. All rights reserved.</p>
+          <div class="flex flex-wrap gap-x-4 gap-y-2">
+            <NuxtLink to="/" class="transition hover:text-emerald-700">Privacy</NuxtLink>
+            <NuxtLink to="/" class="transition hover:text-emerald-700">Terms</NuxtLink>
+            <NuxtLink to="/admin/dashboard" class="transition hover:text-emerald-700">Admin console</NuxtLink>
+          </div>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -99,11 +173,30 @@ const route = useRoute()
 const router = useRouter()
 
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
+const currentYear = new Date().getFullYear()
 
 const navItems = [
   { label: 'Categories', to: '/#categories' },
   { label: 'Deals', to: '/#deals' },
   { label: 'Products', to: '/#products' },
+]
+
+const footerShopLinks = [
+  { label: 'Categories', to: '/#categories' },
+  { label: 'Products', to: '/#products' },
+  { label: 'Daily deals', to: '/#products' },
+]
+
+const footerSupportLinks = [
+  { label: 'Help center', to: '/' },
+  { label: 'Delivery info', to: '/' },
+  { label: 'Order status', to: '/' },
+]
+
+const socialLinks = [
+  { label: 'Facebook', href: '#', icon: 'lucide:facebook' },
+  { label: 'Instagram', href: '#', icon: 'lucide:instagram' },
+  { label: 'Telegram', href: '#', icon: 'lucide:send' },
 ]
 
 watch(
