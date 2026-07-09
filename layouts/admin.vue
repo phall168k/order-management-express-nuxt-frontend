@@ -51,7 +51,7 @@
                 :value="localeItem.code"
               />
             </el-select>
-            <el-avatar :size="34" class="bg-emerald-600">{{ userInitial }}</el-avatar>
+            <el-avatar :size="34" :src="userProfileImageUrl" class="bg-emerald-600">{{ userInitial }}</el-avatar>
             <el-tooltip content="Logout" placement="bottom">
               <el-button circle text type="danger" @click="logout">
                 <Icon name="lucide:log-out" class="h-5 w-5" />
@@ -75,6 +75,8 @@ const { user, hasAnyPermission, clearAuth } = useAuth()
 
 const isCollapsed = ref(false)
 const selectedLocale = ref(locale.value)
+const userProfileImageSource = computed(() => user.value?.userProfile?.profile)
+const { imageUrl: userProfileImageUrl } = useProfileImageUrl(userProfileImageSource)
 
 const menuItems = [
   { path: '/admin/dashboard', label: 'menu.dashboard', icon: 'lucide:layout-dashboard' },
@@ -103,7 +105,12 @@ const currentTitle = computed(() => {
 })
 
 const userInitial = computed(() => {
-  return (user.value?.username || user.value?.email || 'A').charAt(0).toUpperCase()
+  const profileName = [
+    user.value?.userProfile?.firstName,
+    user.value?.userProfile?.lastName
+  ].filter(Boolean).join(' ')
+
+  return (profileName || user.value?.username || user.value?.email || 'A').charAt(0).toUpperCase()
 })
 
 watch(locale, (value) => {

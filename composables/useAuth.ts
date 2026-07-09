@@ -2,6 +2,23 @@ export type AuthRole = {
   _id?: string
   id?: string
   name?: string
+  permissions?: Array<string | { name?: string }>
+}
+
+export type AuthUserProfile = {
+  _id?: string
+  id?: string
+  code?: string
+  userType?: string
+  firstName?: string
+  lastName?: string
+  gender?: string
+  dob?: string
+  phoneNumber?: string
+  address?: string
+  profile?: unknown
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type AuthUser = {
@@ -12,6 +29,7 @@ export type AuthUser = {
   isActive?: boolean
   isSuperUser?: boolean
   roles?: AuthRole[]
+  userProfile?: AuthUserProfile | null
   permission?: string[]
   permissions?: string[]
 }
@@ -42,7 +60,12 @@ const getTokenFromResponse = (response: LoginLikeResponse) => {
 }
 
 const getPermissionsFromUser = (user: AuthUser | null | undefined) => {
-  return user?.permission || user?.permissions || []
+  const directPermissions = user?.permission || user?.permissions || []
+  const rolePermissions = (user?.roles || []).flatMap((role) => role.permissions || [])
+    .map((permission) => typeof permission === 'string' ? permission : permission.name || '')
+    .filter(Boolean)
+
+  return [...new Set([...directPermissions, ...rolePermissions])]
 }
 
 const normalizeAuthUser = (user: AuthUser): AuthUser => ({
@@ -53,6 +76,7 @@ const normalizeAuthUser = (user: AuthUser): AuthUser => ({
   isActive: user.isActive !== false,
   isSuperUser: Boolean(user.isSuperUser),
   roles: user.roles || [],
+  userProfile: user.userProfile || null,
   permission: getPermissionsFromUser(user)
 })
 

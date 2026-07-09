@@ -74,6 +74,7 @@
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import type { AuthUserProfile } from '~/composables/useAuth'
 
 definePageMeta({
   layout: 'auth',
@@ -95,7 +96,9 @@ type LoginResponse = {
       _id?: string
       id?: string
       name?: string
+      permissions?: Array<string | { name?: string }>
     }>
+    userProfile?: AuthUserProfile | null
     permission?: string[]
     permissions?: string[]
     token?: string
@@ -106,7 +109,7 @@ type LoginResponse = {
 }
 
 const config = useRuntimeConfig()
-const { setAuth } = useAuth()
+const { user, setAuth } = useAuth()
 
 const loginFormRef = ref<FormInstance>()
 const isSubmitting = ref(false)
@@ -164,7 +167,7 @@ const submitLogin = async () => {
     }
 
     ElMessage.success(response.message || 'Login successful')
-    await navigateTo(isCustomerUser(response.data) ? '/' : '/admin/dashboard')
+    await navigateTo(isCustomerUser(user.value || response.data) ? '/' : '/admin/dashboard')
   } catch (error) {
     ElMessage.error(getErrorMessage(error))
   } finally {

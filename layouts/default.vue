@@ -80,8 +80,14 @@
           </nav>
 
           <div class="flex items-center gap-1">
-            <button class="grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950" type="button" aria-label="Account">
-              <Icon name="lucide:user-round" class="h-5 w-5" />
+            <button class="grid h-10 w-10 place-items-center overflow-hidden rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950" type="button" aria-label="Account">
+              <img
+                v-if="userProfileImageUrl"
+                :src="userProfileImageUrl"
+                :alt="userProfileName || 'Account'"
+                class="h-8 w-8 rounded-full object-cover"
+              >
+              <Icon v-else name="lucide:user-round" class="h-5 w-5" />
             </button>
             <button class="relative grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950" type="button" aria-label="Cart">
               <Icon name="lucide:shopping-cart" class="h-5 w-5" />
@@ -190,6 +196,12 @@ const { user } = useAuth()
 
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
 const currentYear = new Date().getFullYear()
+const userProfileName = computed(() => [
+  user.value?.userProfile?.firstName,
+  user.value?.userProfile?.lastName
+].filter(Boolean).join(' '))
+const userProfileImageSource = computed(() => user.value?.userProfile?.profile)
+const { imageUrl: userProfileImageUrl } = useProfileImageUrl(userProfileImageSource)
 const isCustomerUser = computed(() => {
   if (user.value?.isSuperUser) return false
 
