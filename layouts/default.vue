@@ -16,13 +16,27 @@
           </ul>
 
           <div class="flex items-center gap-3">
-            <NuxtLink to="/admin/dashboard" class="hidden font-medium hover:text-emerald-950 sm:inline">
+            <NuxtLink v-if="canShowAdminLink" to="/admin/dashboard" class="hidden font-medium hover:text-emerald-950 sm:inline">
               Admin
             </NuxtLink>
-            <button class="grid h-6 w-6 place-items-center rounded-full hover:bg-emerald-100" type="button" aria-label="Khmer language">
+            <button
+              class="grid h-6 w-6 place-items-center rounded-full transition hover:bg-emerald-100"
+              :class="locale === 'km' ? 'bg-emerald-100 ring-1 ring-emerald-500' : ''"
+              type="button"
+              aria-label="Khmer language"
+              :aria-pressed="locale === 'km'"
+              @click="changeLocale('km')"
+            >
               <Icon name="emojione:flag-for-cambodia" class="h-4 w-4" />
             </button>
-            <button class="grid h-6 w-6 place-items-center rounded-full hover:bg-emerald-100" type="button" aria-label="English language">
+            <button
+              class="grid h-6 w-6 place-items-center rounded-full transition hover:bg-emerald-100"
+              :class="locale === 'en' ? 'bg-emerald-100 ring-1 ring-emerald-500' : ''"
+              type="button"
+              aria-label="English language"
+              :aria-pressed="locale === 'en'"
+              @click="changeLocale('en')"
+            >
               <Icon name="circle-flags:us" class="h-4 w-4" />
             </button>
           </div>
@@ -160,7 +174,7 @@
           <div class="flex flex-wrap gap-x-4 gap-y-2">
             <NuxtLink to="/" class="transition hover:text-emerald-700">Privacy</NuxtLink>
             <NuxtLink to="/" class="transition hover:text-emerald-700">Terms</NuxtLink>
-            <NuxtLink to="/admin/dashboard" class="transition hover:text-emerald-700">Admin console</NuxtLink>
+            <NuxtLink v-if="canShowAdminLink" to="/admin/dashboard" class="transition hover:text-emerald-700">Admin console</NuxtLink>
           </div>
         </div>
       </div>
@@ -171,9 +185,17 @@
 <script setup lang="ts">
 const route = useRoute()
 const router = useRouter()
+const { locale, setLocale } = useI18n()
+const { user } = useAuth()
 
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
 const currentYear = new Date().getFullYear()
+const isCustomerUser = computed(() => {
+  if (user.value?.isSuperUser) return false
+
+  return user.value?.roles?.some((role) => role.name?.toLowerCase() === 'customer') ?? false
+})
+const canShowAdminLink = computed(() => !isCustomerUser.value)
 
 const navItems = [
   { label: 'Categories', to: '/#categories' },
@@ -212,5 +234,10 @@ const submitSearch = async () => {
     query: search.value.trim() ? { q: search.value.trim() } : {},
     hash: '#products',
   })
+}
+
+const changeLocale = (value: 'en' | 'km') => {
+  if (locale.value === value) return
+  setLocale(value)
 }
 </script>
