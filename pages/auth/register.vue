@@ -48,6 +48,21 @@
             </el-input>
           </el-form-item>
 
+          <el-form-item label="Confirm password" prop="confirmPassword">
+            <el-input
+              v-model="form.confirmPassword"
+              autocomplete="new-password"
+              placeholder="Confirm your password"
+              show-password
+              size="large"
+              type="password"
+            >
+              <template #prefix>
+                <Icon name="lucide:lock-keyhole" class="h-4 w-4 text-slate-400" />
+              </template>
+            </el-input>
+          </el-form-item>
+
           <el-form-item label="Gender" prop="gender">
             <el-select v-model="form.gender" class="w-full" placeholder="Select gender" size="large">
               <el-option v-for="option in genderOptions" :key="option.value" :label="option.label" :value="option.value" />
@@ -87,11 +102,7 @@
           </el-form-item>
 
           <el-form-item class="md:col-span-2" label="Profile image" prop="profile">
-            <el-input v-model="form.profile" placeholder="uploads/profiles/customer01.jpg" size="large">
-              <template #prefix>
-                <Icon name="lucide:image" class="h-4 w-4 text-slate-400" />
-              </template>
-            </el-input>
+            <SingleUpload v-model="profileUploadValue" class="w-full"/>
           </el-form-item>
         </div>
 
@@ -119,6 +130,7 @@
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import SingleUpload from '~/@core/components/SingleUpload.vue'
 
 definePageMeta({
   layout: 'auth',
@@ -131,14 +143,35 @@ type RegisterForm = {
   username: string
   email: string
   password: string
+  confirmPassword: string
   firstName: string
   lastName: string
   gender: Gender
   dob: string
   phoneNumber: string
   address: string
-  profile: string
+  profile: ProfileValue
 }
+
+type MinioUploadObject = {
+  bucket?: string
+  objectName?: string
+  originalName?: string
+  mimeType?: string
+  size?: number
+  etag?: string
+  publicId?: string
+  public_id?: string
+  fileName?: string
+  filename?: string
+  url?: string
+  secureUrl?: string
+  secure_url?: string
+  path?: string
+  data?: ProfileValue
+}
+
+type ProfileValue = string | MinioUploadObject | null
 
 type RegisterResponse = {
   success?: boolean
@@ -160,6 +193,7 @@ type RegisterResponse = {
     }>
     permission?: string[]
     permissions?: string[]
+    userProfile?: unknown
     token?: string
     accessToken?: string
     access_token?: string
@@ -176,13 +210,14 @@ const form = reactive<RegisterForm>({
   username: '',
   email: '',
   password: '',
+  confirmPassword: '',
   firstName: '',
   lastName: '',
   gender: 'male',
   dob: '',
   phoneNumber: '',
   address: '',
-  profile: ''
+  profile: null
 })
 
 const genderOptions: Array<{ label: string; value: Gender }> = [
@@ -192,6 +227,21 @@ const genderOptions: Array<{ label: string; value: Gender }> = [
 ]
 
 const apiBaseUrl = computed(() => String(config.public.apiBaseUrl).replace(/\/$/, ''))
+const minioBucketPathPattern = /\/order-management\/(.+?)(?:\?.*)?$/
+
+const validateConfirmPassword = (_rule: unknown, value: string, callback: (error?: Error) => void) => {
+  if (!value) {
+    callback(new Error('Confirm password is required'))
+    return
+  }
+
+  if (value !== form.password) {
+    callback(new Error('Passwords do not match'))
+    return
+  }
+
+  callback()
+}
 
 const rules: FormRules<RegisterForm> = {
   username: [
@@ -205,6 +255,9 @@ const rules: FormRules<RegisterForm> = {
   password: [
     { required: true, message: 'Password is required', trigger: 'blur' },
     { min: 8, message: 'Password must be at least 8 characters', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { validator: validateConfirmPassword, trigger: ['blur', 'change'] }
   ],
   firstName: [
     { required: true, message: 'First name is required', trigger: 'blur' }
@@ -226,6 +279,15 @@ const rules: FormRules<RegisterForm> = {
   ]
 }
 
+watch(
+  () => form.password,
+  () => {
+    if (form.confirmPassword) {
+      registerFormRef.value?.validateField('confirmPassword')
+    }
+  }
+)
+
 const getErrorMessage = (error: unknown) => {
   if (typeof error === 'object' && error !== null && 'data' in error) {
     const data = (error as { data?: { message?: string; error?: string } }).data
@@ -235,8 +297,61 @@ const getErrorMessage = (error: unknown) => {
   return 'Unable to register. Please try again.'
 }
 
+const normalizeProfileValue = (value?: ProfileValue): ProfileValue | '' => {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  if (value.data) return normalizeProfileValue(value.data)
+
+  return value
+}
+
+const getProfileObjectName = (profile?: ProfileValue) => {
+  if (!profile) return ''
+
+  if (typeof profile !== 'string') {
+    if (profile.data) return getProfileObjectName(profile.data)
+
+    return profile.objectName
+      || profile.publicId
+      || profile.public_id
+      || profile.fileName
+      || profile.filename
+      || (profile.url?.match(minioBucketPathPattern)?.[1]
+        ? decodeURIComponent(profile.url.match(minioBucketPathPattern)?.[1] || '')
+        : '')
+  }
+
+  if (profile.startsWith('uploads/')) return ''
+
+  const objectNameFromUrl = profile.match(minioBucketPathPattern)?.[1]
+  if (objectNameFromUrl) return decodeURIComponent(objectNameFromUrl)
+  if (/^https?:\/\//.test(profile)) return ''
+
+  return profile
+}
+
+const normalizeProfileForPayload = (value?: ProfileValue): MinioUploadObject | null => {
+  const profile = normalizeProfileValue(value)
+  if (!profile || typeof profile === 'string') return null
+
+  const objectName = getProfileObjectName(profile)
+  if (!objectName) return null
+
+  return {
+    ...profile,
+    objectName
+  }
+}
+
+const profileUploadValue = computed<ProfileValue>({
+  get: () => form.profile || null,
+  set: (value) => {
+    form.profile = normalizeProfileValue(value) || null
+  }
+})
+
 const buildPayload = () => {
-  const profile = form.profile.trim()
+  const profile = normalizeProfileForPayload(form.profile)
 
   return {
     username: form.username.trim(),
