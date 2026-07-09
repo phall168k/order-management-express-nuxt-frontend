@@ -45,14 +45,14 @@
                 <img :src="getBannerImage(banner)" :alt="banner.title" class="h-[320px] w-full object-cover sm:h-[380px]">
                 <div class="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/55 to-slate-950/10" />
                 <div class="absolute inset-y-0 left-0 flex max-w-2xl flex-col justify-center px-6 sm:px-10">
-                  <p class="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-emerald-200">{{ banner.product?.code || 'Featured' }}</p>
+                  <p class="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-emerald-200">{{ getBannerProductCode(banner) || 'Featured' }}</p>
                   <h1 class="text-3xl font-bold leading-tight sm:text-5xl">{{ banner.title }}</h1>
                   <p class="mt-4 max-w-md text-sm leading-6 text-slate-100 sm:text-base">{{ banner.description }}</p>
-                  <div v-if="banner.product" class="mt-6 flex flex-wrap items-center gap-3">
-                    <button class="rounded-md bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700" type="button" @click="openProductDetail(banner.product._id)">
+                  <div v-if="getBannerProductId(banner)" class="mt-6 flex flex-wrap items-center gap-3">
+                    <button class="rounded-md bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700" type="button" @click="openProductDetail(getBannerProductId(banner))">
                       View product
                     </button>
-                    <span class="text-sm font-semibold text-emerald-100">{{ formatPrice(getDiscountedPrice(banner.product.unitPrice, banner.product.discount)) }}</span>
+                    <span v-if="getBannerProductPrice(banner)" class="text-sm font-semibold text-emerald-100">{{ getBannerProductPrice(banner) }}</span>
                   </div>
                 </div>
               </div>
@@ -270,6 +270,26 @@ type ApiStock = {
   isStock?: boolean
 }
 
+type MinioUploadObject = {
+  bucket?: string
+  objectName?: string
+  originalName?: string
+  mimeType?: string
+  size?: number
+  etag?: string
+  publicId?: string
+  public_id?: string
+  fileName?: string
+  filename?: string
+  url?: string
+  secureUrl?: string
+  secure_url?: string
+  path?: string
+  data?: ThumbnailValue
+}
+
+type ThumbnailValue = string | MinioUploadObject | null
+
 type ApiProduct = {
   _id?: string
   id?: string
@@ -277,7 +297,7 @@ type ApiProduct = {
   nameEn: string
   nameKh?: string
   unitPrice: number
-  thumbnail?: string
+  thumbnail?: ThumbnailValue
   discount?: number
   description?: string
   category?: ApiCategory
@@ -287,10 +307,10 @@ type ApiProduct = {
 type ApiBanner = {
   id?: string
   _id?: string
-  product?: ApiProduct
+  product?: string | ApiProduct
   title: string
   description?: string
-  thumbnail?: string
+  thumbnail?: ThumbnailValue
 }
 
 type CollectionResponse<T> = {
@@ -335,6 +355,7 @@ const categoryOptions = ref<ApiCategory[]>([])
 const banners = ref<ApiBanner[]>([])
 const products = ref<ApiProduct[]>([])
 const selectedProduct = ref<ApiProduct | null>(null)
+const thumbnailUrlCache = ref<Record<string, string>>({})
 const categoryLoading = ref(true)
 const bannerLoading = ref(true)
 const productLoading = ref(false)
@@ -364,6 +385,8 @@ const fallbackProductImages = [
   'https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=700&q=80',
   'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=700&q=80'
 ]
+
+const minioBucketPathPattern = /\/order-management\/(.+?)(?:\?.*)?$/
 
 const isInitialProductLoading = computed(() => productLoading.value && productPage.value === 1)
 const isLoadingMore = computed(() => productLoading.value && productPage.value > 1)
@@ -420,19 +443,69 @@ const getCategoryName = (category?: ApiCategory) => {
   return category?.nameEn || category?.nameKh || category?.code || 'Uncategorized'
 }
 
-const getProductId = (product: ApiProduct) => product._id || product.id || ''
+const isProductObject = (product?: string | ApiProduct): product is ApiProduct => {
+  return typeof product === 'object' && product !== null
+}
+
+const getProductId = (product?: string | ApiProduct) => {
+  if (!product) return ''
+  return typeof product === 'string' ? product : product._id || product.id || ''
+}
 
 const getBannerId = (banner: ApiBanner, index: number) => banner._id || banner.id || `${banner.title}-${index}`
+
+const getObjectNameFromThumbnail = (thumbnail?: ThumbnailValue): string => {
+  if (!thumbnail) return ''
+
+  if (typeof thumbnail === 'string') {
+    if (thumbnail.startsWith('uploads/')) return ''
+
+    const objectNameFromUrl = thumbnail.match(minioBucketPathPattern)?.[1]
+    if (objectNameFromUrl) return decodeURIComponent(objectNameFromUrl)
+    if (/^https?:\/\//.test(thumbnail)) return ''
+
+    return thumbnail
+  }
+
+  if (thumbnail.data) return getObjectNameFromThumbnail(thumbnail.data)
+
+  return thumbnail.objectName
+    || thumbnail.publicId
+    || thumbnail.public_id
+    || thumbnail.fileName
+    || thumbnail.filename
+    || (thumbnail.url?.match(minioBucketPathPattern)?.[1]
+      ? decodeURIComponent(thumbnail.url.match(minioBucketPathPattern)?.[1] || '')
+      : '')
+}
 
 const isUsableImageSource = (source?: string) => {
   if (!source) return false
   return /^https?:\/\//.test(source) || source.includes('/') || /\.(png|jpe?g|webp|gif|avif)$/i.test(source)
 }
 
-const getAssetUrl = (source?: string) => {
+const getDirectAssetUrl = (source?: ThumbnailValue) => {
+  if (!source) return ''
+
+  if (typeof source !== 'string') {
+    if (getObjectNameFromThumbnail(source)) return ''
+
+    return source.secureUrl || source.secure_url || source.url || source.path || ''
+  }
+
   if (!isUsableImageSource(source)) return ''
-  if (/^https?:\/\//.test(source || '')) return source || ''
+  if (getObjectNameFromThumbnail(source)) return ''
+  if (/^https?:\/\//.test(source)) return source
+
   return `${apiBaseUrl.value.replace(/\/api\/v\d+$/, '')}/${String(source).replace(/^\//, '')}`
+}
+
+const getThumbnailCacheKey = (source?: ThumbnailValue) => getObjectNameFromThumbnail(source) || getDirectAssetUrl(source)
+
+const getAssetUrl = (source?: ThumbnailValue) => {
+  const cacheKey = getThumbnailCacheKey(source)
+
+  return (cacheKey ? thumbnailUrlCache.value[cacheKey] : '') || getDirectAssetUrl(source)
 }
 
 const getFallbackProductImage = (product?: ApiProduct) => {
@@ -446,7 +519,19 @@ const getProductImage = (product: ApiProduct) => {
 }
 
 const getBannerImage = (banner: ApiBanner) => {
-  return getAssetUrl(banner.thumbnail) || getAssetUrl(banner.product?.thumbnail) || fallbackBanners[0].thumbnail || ''
+  return getAssetUrl(banner.thumbnail) || getAssetUrl(isProductObject(banner.product) ? banner.product.thumbnail : null) || fallbackBanners[0].thumbnail || ''
+}
+
+const getBannerProductId = (banner: ApiBanner) => getProductId(banner.product)
+
+const getBannerProductCode = (banner: ApiBanner) => {
+  return isProductObject(banner.product) ? banner.product.code : ''
+}
+
+const getBannerProductPrice = (banner: ApiBanner) => {
+  if (!isProductObject(banner.product)) return ''
+
+  return formatPrice(getDiscountedPrice(banner.product.unitPrice, banner.product.discount))
 }
 
 const getDiscountedPrice = (unitPrice = 0, discount = 0) => {
@@ -483,6 +568,48 @@ const countLoadedProductsByCategory = (category: ApiCategory) => {
   }).length
 }
 
+const loadThumbnailUrl = async (thumbnail?: ThumbnailValue) => {
+  const objectName = getObjectNameFromThumbnail(thumbnail)
+  if (!thumbnail || !objectName || thumbnailUrlCache.value[objectName]) return
+
+  try {
+    const response = await $fetch<{ data?: { url?: string }; url?: string }>('minio/presigned-get', {
+      baseURL: `${apiBaseUrl.value}/`,
+      method: 'post',
+      headers: requestHeaders.value,
+      body: {
+        objectName,
+        expiresInSeconds: 3600
+      }
+    })
+
+    const url = response.data?.url || response.url
+    if (url) {
+      thumbnailUrlCache.value = {
+        ...thumbnailUrlCache.value,
+        [objectName]: url
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const loadProductImageUrls = (items: ApiProduct[]) => {
+  items.forEach((product) => {
+    loadThumbnailUrl(product.thumbnail)
+  })
+}
+
+const loadBannerImageUrls = (items: ApiBanner[]) => {
+  items.forEach((banner) => {
+    loadThumbnailUrl(banner.thumbnail)
+    if (isProductObject(banner.product)) {
+      loadThumbnailUrl(banner.product.thumbnail)
+    }
+  })
+}
+
 const refreshCategories = async () => {
   categoryLoading.value = true
 
@@ -513,6 +640,7 @@ const refreshBanners = async () => {
     if (!banners.value.length) {
       banners.value = fallbackBanners
     }
+    loadBannerImageUrls(banners.value)
   } catch (error) {
     banners.value = fallbackBanners
     ElMessage.error(getErrorMessage(error, 'Failed to load banners.'))
@@ -524,7 +652,7 @@ const refreshBanners = async () => {
 const buildProductQuery = () => ({
   page: productPage.value,
   limit: productLimit,
-  search: search.value.trim(),
+  ...(search.value.trim() ? { search: search.value.trim() } : {}),
   ...(selectedCategory.value !== 'all' ? { category: selectedCategory.value } : {})
 })
 
@@ -540,6 +668,7 @@ const refreshProducts = async (mode: 'replace' | 'append' = 'replace') => {
 
     const items = extractCollection(response)
     products.value = mode === 'append' ? [...products.value, ...items] : items
+    loadProductImageUrls(items)
     totalProducts.value = response.pagination?.total ?? products.value.length
   } catch (error) {
     ElMessage.error(getErrorMessage(error, 'Failed to load products.'))
@@ -583,6 +712,7 @@ const openProductDetail = async (productId?: string) => {
       headers: requestHeaders.value
     })
     selectedProduct.value = response.data || selectedProduct.value
+    loadThumbnailUrl(selectedProduct.value?.thumbnail)
   } catch (error) {
     ElMessage.error(getErrorMessage(error, 'Failed to load product detail.'))
   } finally {
