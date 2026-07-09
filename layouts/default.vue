@@ -80,15 +80,43 @@
           </nav>
 
           <div class="flex items-center gap-1">
-            <button class="grid h-10 w-10 place-items-center overflow-hidden rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950" type="button" aria-label="Account">
-              <img
-                v-if="userProfileImageUrl"
-                :src="userProfileImageUrl"
-                :alt="userProfileName || 'Account'"
-                class="h-8 w-8 rounded-full object-cover"
-              >
-              <Icon v-else name="lucide:user-round" class="h-5 w-5" />
-            </button>
+            <el-dropdown trigger="click" @command="handleAccountCommand">
+              <button class="grid h-10 w-10 place-items-center overflow-hidden rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950" type="button" aria-label="Account">
+                <img
+                  v-if="userProfileImageUrl"
+                  :src="userProfileImageUrl"
+                  :alt="userProfileName || 'Account'"
+                  class="h-8 w-8 rounded-full object-cover"
+                >
+                <Icon v-else name="lucide:user-round" class="h-5 w-5" />
+              </button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <template v-if="isAuthenticated">
+                    <el-dropdown-item command="view-profile">
+                      <Icon name="lucide:user-round" class="mr-2 h-4 w-4" />
+                      View profile
+                    </el-dropdown-item>
+                    <el-dropdown-item command="edit-profile">
+                      <Icon name="lucide:pencil" class="mr-2 h-4 w-4" />
+                      Edit profile
+                    </el-dropdown-item>
+                    <el-dropdown-item command="change-password">
+                      <Icon name="lucide:key-round" class="mr-2 h-4 w-4" />
+                      Change password
+                    </el-dropdown-item>
+                    <el-dropdown-item divided command="logout">
+                      <Icon name="lucide:log-out" class="mr-2 h-4 w-4" />
+                      Logout
+                    </el-dropdown-item>
+                  </template>
+                  <el-dropdown-item v-else command="login">
+                    <Icon name="lucide:log-in" class="mr-2 h-4 w-4" />
+                    Sign in
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
             <button class="relative grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950" type="button" aria-label="Cart">
               <Icon name="lucide:shopping-cart" class="h-5 w-5" />
               <span class="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-rose-600 px-1 text-[10px] font-bold leading-none text-white">3</span>
@@ -111,6 +139,146 @@
     <main>
       <slot />
     </main>
+
+    <el-dialog v-model="isProfileViewVisible" title="Profile" width="680px" destroy-on-close>
+      <div v-loading="profileLoading" class="min-h-40">
+        <div v-if="profileViewData" class="grid gap-5 md:grid-cols-[120px_1fr]">
+          <div class="grid place-items-start">
+            <div class="grid h-24 w-24 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-50">
+              <img
+                v-if="profileViewImageUrl"
+                :src="profileViewImageUrl"
+                :alt="profileViewName || 'Profile'"
+                class="h-full w-full object-cover"
+              >
+              <Icon v-else name="lucide:user-round" class="h-8 w-8 text-slate-400" />
+            </div>
+          </div>
+
+          <dl class="grid gap-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt class="text-xs text-slate-500">Username</dt>
+              <dd class="mt-1 font-medium text-slate-950">{{ profileViewData.username || '-' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-slate-500">Email</dt>
+              <dd class="mt-1 font-medium text-slate-950">{{ profileViewData.email || '-' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-slate-500">Full name</dt>
+              <dd class="mt-1 font-medium text-slate-950">{{ profileViewName || '-' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-slate-500">Gender</dt>
+              <dd class="mt-1 font-medium text-slate-950">{{ profileViewData.userProfile?.gender || '-' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-slate-500">Date of birth</dt>
+              <dd class="mt-1 font-medium text-slate-950">{{ formatDate(profileViewData.userProfile?.dob) }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-slate-500">Phone</dt>
+              <dd class="mt-1 font-medium text-slate-950">{{ profileViewData.userProfile?.phoneNumber || '-' }}</dd>
+            </div>
+            <div class="sm:col-span-2">
+              <dt class="text-xs text-slate-500">Address</dt>
+              <dd class="mt-1 font-medium text-slate-950">{{ profileViewData.userProfile?.address || '-' }}</dd>
+            </div>
+            <div class="sm:col-span-2">
+              <dt class="text-xs text-slate-500">Note</dt>
+              <dd class="mt-1 font-medium text-slate-950">{{ profileViewData.userProfile?.note || '-' }}</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </el-dialog>
+
+    <el-dialog v-model="isProfileEditVisible" title="Edit profile" width="760px" destroy-on-close>
+      <el-form
+        ref="profileFormRef"
+        :model="profileForm"
+        :rules="profileRules"
+        label-position="top"
+        @submit.prevent="submitProfile"
+      >
+        <div class="grid gap-x-4 md:grid-cols-2">
+          <el-form-item label="Username" prop="username">
+            <el-input v-model="profileForm.username" autocomplete="username" />
+          </el-form-item>
+          <el-form-item label="Email" prop="email">
+            <el-input v-model="profileForm.email" autocomplete="email" />
+          </el-form-item>
+          <el-form-item label="First name" prop="firstName">
+            <el-input v-model="profileForm.firstName" autocomplete="given-name" />
+          </el-form-item>
+          <el-form-item label="Last name" prop="lastName">
+            <el-input v-model="profileForm.lastName" autocomplete="family-name" />
+          </el-form-item>
+          <el-form-item label="Gender" prop="gender">
+            <el-select v-model="profileForm.gender" class="w-full">
+              <el-option label="Male" value="male" />
+              <el-option label="Female" value="female" />
+              <el-option label="Other" value="other" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Date of birth" prop="dob">
+            <el-date-picker
+              v-model="profileForm.dob"
+              class="!w-full"
+              format="YYYY-MM-DD"
+              type="date"
+              value-format="YYYY-MM-DD"
+            />
+          </el-form-item>
+          <el-form-item label="Phone number" prop="phoneNumber">
+            <el-input v-model="profileForm.phoneNumber" autocomplete="tel" />
+          </el-form-item>
+          <el-form-item label="Address" prop="address">
+            <el-input v-model="profileForm.address" autocomplete="street-address" />
+          </el-form-item>
+          <el-form-item class="md:col-span-2" label="Note" prop="note">
+            <el-input v-model="profileForm.note" :rows="3" type="textarea" />
+          </el-form-item>
+          <el-form-item class="md:col-span-2" label="Profile image" prop="profile">
+            <SingleUpload v-model="profileUploadValue" class="w-full" />
+          </el-form-item>
+        </div>
+      </el-form>
+
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <el-button @click="isProfileEditVisible = false">Cancel</el-button>
+          <el-button type="primary" :loading="profileSaving" @click="submitProfile">Save</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="isPasswordDialogVisible" title="Change password" width="520px" destroy-on-close>
+      <el-form
+        ref="passwordFormRef"
+        :model="passwordForm"
+        :rules="passwordRules"
+        label-position="top"
+        @submit.prevent="submitPassword"
+      >
+        <el-form-item label="Current password" prop="currentPassword">
+          <el-input v-model="passwordForm.currentPassword" autocomplete="current-password" show-password type="password" />
+        </el-form-item>
+        <el-form-item label="New password" prop="newPassword">
+          <el-input v-model="passwordForm.newPassword" autocomplete="new-password" show-password type="password" />
+        </el-form-item>
+        <el-form-item label="Confirm password" prop="confirmPassword">
+          <el-input v-model="passwordForm.confirmPassword" autocomplete="new-password" show-password type="password" />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <el-button @click="isPasswordDialogVisible = false">Cancel</el-button>
+          <el-button type="primary" :loading="passwordSaving" @click="submitPassword">Save</el-button>
+        </div>
+      </template>
+    </el-dialog>
 
     <footer class="border-t border-slate-200 bg-white">
       <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-8">
@@ -189,13 +357,24 @@
 </template>
 
 <script setup lang="ts">
+import { ElMessage } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
+import SingleUpload from '~/@core/components/SingleUpload.vue'
+import type { AuthUser, AuthUserProfile } from '~/composables/useAuth'
+
 const route = useRoute()
 const router = useRouter()
 const { locale, setLocale } = useI18n()
-const { user } = useAuth()
+const config = useRuntimeConfig()
+const authToken = useCookie<string | null>('auth_token')
+const { user, isAuthenticated, setAuth, clearAuth } = useAuth()
 
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
 const currentYear = new Date().getFullYear()
+const apiBaseUrl = computed(() => String(config.public.apiBaseUrl).replace(/\/$/, ''))
+const requestHeaders = computed(() => ({
+  ...(authToken.value ? { Authorization: `Bearer ${authToken.value}` } : {})
+}))
 const userProfileName = computed(() => [
   user.value?.userProfile?.firstName,
   user.value?.userProfile?.lastName
@@ -233,11 +412,172 @@ const socialLinks = [
   { label: 'Telegram', href: '#', icon: 'lucide:send' },
 ]
 
+type MinioUploadObject = {
+  bucket?: string
+  objectName?: string
+  originalName?: string
+  mimeType?: string
+  size?: number
+  etag?: string
+  publicId?: string
+  public_id?: string
+  fileName?: string
+  filename?: string
+  url?: string
+  secureUrl?: string
+  secure_url?: string
+  path?: string
+  data?: ProfileValue
+}
+
+type ProfileValue = string | MinioUploadObject | null
+
+type ProfileForm = {
+  username: string
+  email: string
+  firstName: string
+  lastName: string
+  gender: string
+  dob: string
+  phoneNumber: string
+  address: string
+  note: string
+  profile: ProfileValue
+}
+
+type PasswordForm = {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
+type UserDetailResponse = {
+  data?: AuthUser
+  user?: AuthUser
+}
+
+type ProfileUpdateResponse = {
+  data?: AuthUser | {
+    user?: Partial<AuthUser>
+    userProfile?: AuthUserProfile | null
+  }
+  user?: Partial<AuthUser>
+  userProfile?: AuthUserProfile | null
+  message?: string
+}
+
+type ChangePasswordResponse = {
+  data?: AuthUser
+  token?: string
+  message?: string
+}
+
+const minioBucketPathPattern = /\/order-management\/(.+?)(?:\?.*)?$/
+const isProfileViewVisible = ref(false)
+const isProfileEditVisible = ref(false)
+const isPasswordDialogVisible = ref(false)
+const profileLoading = ref(false)
+const profileSaving = ref(false)
+const passwordSaving = ref(false)
+const profileViewData = ref<AuthUser | null>(null)
+const profileFormRef = ref<FormInstance>()
+const passwordFormRef = ref<FormInstance>()
+const profileViewImageSource = computed(() => profileViewData.value?.userProfile?.profile)
+const { imageUrl: profileViewImageUrl } = useProfileImageUrl(profileViewImageSource)
+
+const profileForm = reactive<ProfileForm>({
+  username: '',
+  email: '',
+  firstName: '',
+  lastName: '',
+  gender: 'male',
+  dob: '',
+  phoneNumber: '',
+  address: '',
+  note: '',
+  profile: null
+})
+
+const passwordForm = reactive<PasswordForm>({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+
+const profileViewName = computed(() => [
+  profileViewData.value?.userProfile?.firstName,
+  profileViewData.value?.userProfile?.lastName
+].filter(Boolean).join(' '))
+
+const profileRules: FormRules<ProfileForm> = {
+  username: [
+    { required: true, message: 'Username is required', trigger: 'blur' }
+  ],
+  email: [
+    { required: true, message: 'Email is required', trigger: 'blur' },
+    { type: 'email', message: 'Enter a valid email address', trigger: ['blur', 'change'] }
+  ],
+  firstName: [
+    { required: true, message: 'First name is required', trigger: 'blur' }
+  ],
+  lastName: [
+    { required: true, message: 'Last name is required', trigger: 'blur' }
+  ],
+  gender: [
+    { required: true, message: 'Gender is required', trigger: 'change' }
+  ],
+  dob: [
+    { required: true, message: 'Date of birth is required', trigger: 'change' }
+  ],
+  phoneNumber: [
+    { required: true, message: 'Phone number is required', trigger: 'blur' }
+  ],
+  address: [
+    { required: true, message: 'Address is required', trigger: 'blur' }
+  ]
+}
+
+const validateConfirmPassword = (_rule: unknown, value: string, callback: (error?: Error) => void) => {
+  if (!value) {
+    callback(new Error('Confirm password is required'))
+    return
+  }
+
+  if (value !== passwordForm.newPassword) {
+    callback(new Error('Passwords do not match'))
+    return
+  }
+
+  callback()
+}
+
+const passwordRules: FormRules<PasswordForm> = {
+  currentPassword: [
+    { required: true, message: 'Current password is required', trigger: 'blur' }
+  ],
+  newPassword: [
+    { required: true, message: 'New password is required', trigger: 'blur' },
+    { min: 6, message: 'New password must be at least 6 characters', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { validator: validateConfirmPassword, trigger: ['blur', 'change'] }
+  ]
+}
+
 watch(
   () => route.query.q,
   (value) => {
     search.value = typeof value === 'string' ? value : ''
   },
+)
+
+watch(
+  () => passwordForm.newPassword,
+  () => {
+    if (passwordForm.confirmPassword) {
+      passwordFormRef.value?.validateField('confirmPassword')
+    }
+  }
 )
 
 const submitSearch = async () => {
@@ -251,5 +591,307 @@ const submitSearch = async () => {
 const changeLocale = (value: 'en' | 'km') => {
   if (locale.value === value) return
   setLocale(value)
+}
+
+const getCurrentUserId = () => user.value?._id || user.value?.id || ''
+
+const formatDate = (value?: string) => {
+  if (!value) return '-'
+  const [date] = value.split('T')
+  return date || '-'
+}
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error === 'object' && error !== null && 'data' in error) {
+    const data = (error as { data?: { message?: string; error?: string } }).data
+    return data?.message || data?.error || fallback
+  }
+
+  return fallback
+}
+
+const normalizeProfileValue = (value?: ProfileValue): ProfileValue | '' => {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  if (value.data) return normalizeProfileValue(value.data)
+
+  return value
+}
+
+const getProfileObjectName = (profile?: ProfileValue) => {
+  if (!profile) return ''
+
+  if (typeof profile !== 'string') {
+    if (profile.data) return getProfileObjectName(profile.data)
+
+    return profile.objectName
+      || profile.publicId
+      || profile.public_id
+      || profile.fileName
+      || profile.filename
+      || (profile.url?.match(minioBucketPathPattern)?.[1]
+        ? decodeURIComponent(profile.url.match(minioBucketPathPattern)?.[1] || '')
+        : '')
+  }
+
+  if (profile.startsWith('uploads/')) return ''
+
+  const objectNameFromUrl = profile.match(minioBucketPathPattern)?.[1]
+  if (objectNameFromUrl) return decodeURIComponent(objectNameFromUrl)
+  if (/^https?:\/\//.test(profile)) return ''
+
+  return profile
+}
+
+const normalizeProfileForPayload = (value?: ProfileValue): MinioUploadObject | null => {
+  const profile = normalizeProfileValue(value)
+  if (!profile || typeof profile === 'string') return null
+
+  const objectName = getProfileObjectName(profile)
+  if (!objectName) return null
+
+  return {
+    ...profile,
+    objectName
+  }
+}
+
+const profileUploadValue = computed<ProfileValue>({
+  get: () => profileForm.profile || null,
+  set: (value) => {
+    profileForm.profile = normalizeProfileValue(value) || null
+  }
+})
+
+const syncProfileForm = (authUser: AuthUser | null | undefined = user.value) => {
+  Object.assign(profileForm, {
+    username: authUser?.username || '',
+    email: authUser?.email || '',
+    firstName: authUser?.userProfile?.firstName || '',
+    lastName: authUser?.userProfile?.lastName || '',
+    gender: authUser?.userProfile?.gender || 'male',
+    dob: formatDate(authUser?.userProfile?.dob) === '-' ? '' : formatDate(authUser?.userProfile?.dob),
+    phoneNumber: authUser?.userProfile?.phoneNumber || '',
+    address: authUser?.userProfile?.address || '',
+    note: authUser?.userProfile?.note || '',
+    profile: normalizeProfileValue(authUser?.userProfile?.profile as ProfileValue) || null
+  })
+}
+
+const resetPasswordForm = () => {
+  Object.assign(passwordForm, {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+  passwordFormRef.value?.clearValidate()
+}
+
+const loadCurrentUser = async () => {
+  const userId = getCurrentUserId()
+  if (!userId) return user.value || null
+
+  profileLoading.value = true
+
+  try {
+    const response = await $fetch<UserDetailResponse>(`${apiBaseUrl.value}/system/users/${userId}`, {
+      headers: requestHeaders.value
+    })
+    const nextUser = response.data || response.user || null
+
+    if (nextUser) {
+      user.value = {
+        ...user.value,
+        ...nextUser,
+        userProfile: nextUser.userProfile || null
+      }
+      profileViewData.value = user.value
+      return user.value
+    }
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error, 'Failed to load profile.'))
+  } finally {
+    profileLoading.value = false
+  }
+
+  return user.value || null
+}
+
+const openProfileView = async () => {
+  if (!isAuthenticated.value) {
+    await navigateTo('/auth/login')
+    return
+  }
+
+  profileViewData.value = user.value || null
+  isProfileViewVisible.value = true
+  await loadCurrentUser()
+}
+
+const openProfileEdit = async () => {
+  if (!isAuthenticated.value) {
+    await navigateTo('/auth/login')
+    return
+  }
+
+  const loadedUser = await loadCurrentUser()
+  syncProfileForm(loadedUser)
+  profileFormRef.value?.clearValidate()
+  isProfileEditVisible.value = true
+}
+
+const openPasswordDialog = () => {
+  resetPasswordForm()
+  isPasswordDialogVisible.value = true
+}
+
+const mergeProfileUpdate = (response: ProfileUpdateResponse) => {
+  const responseData = response.data
+  const responseUser = response.user || (responseData && 'user' in responseData ? responseData.user : undefined)
+  const responseUserProfile = response.userProfile || (responseData && 'userProfile' in responseData ? responseData.userProfile : undefined)
+  const directUser = responseData && ('username' in responseData || 'email' in responseData || 'userProfile' in responseData)
+    ? responseData as AuthUser
+    : null
+
+  user.value = {
+    ...user.value,
+    ...(directUser || {}),
+    ...(responseUser || {}),
+    username: responseUser?.username || directUser?.username || profileForm.username,
+    email: responseUser?.email || directUser?.email || profileForm.email,
+    userProfile: responseUserProfile !== undefined
+      ? responseUserProfile
+      : directUser?.userProfile || {
+        ...(user.value?.userProfile || {}),
+        firstName: profileForm.firstName,
+        lastName: profileForm.lastName,
+        gender: profileForm.gender,
+        dob: profileForm.dob,
+        phoneNumber: profileForm.phoneNumber,
+        address: profileForm.address,
+        note: profileForm.note,
+        profile: normalizeProfileValue(profileForm.profile) || null
+      }
+  } as AuthUser
+}
+
+const buildProfilePayload = () => {
+  const profile = normalizeProfileForPayload(profileForm.profile)
+
+  return {
+    user: {
+      username: profileForm.username.trim(),
+      email: profileForm.email.trim()
+    },
+    userProfile: {
+      firstName: profileForm.firstName.trim(),
+      lastName: profileForm.lastName.trim(),
+      gender: profileForm.gender,
+      dob: profileForm.dob,
+      phoneNumber: profileForm.phoneNumber.trim(),
+      address: profileForm.address.trim(),
+      note: profileForm.note.trim(),
+      ...(profile ? { profile } : {})
+    }
+  }
+}
+
+const submitProfile = async () => {
+  if (!profileFormRef.value) return
+
+  const isValid = await profileFormRef.value.validate().catch(() => false)
+  if (!isValid) return
+
+  profileSaving.value = true
+
+  try {
+    const response = await $fetch<ProfileUpdateResponse>(`${apiBaseUrl.value}/auth/profile`, {
+      method: 'PUT',
+      headers: requestHeaders.value,
+      body: buildProfilePayload()
+    })
+
+    mergeProfileUpdate(response)
+    profileViewData.value = user.value || null
+    ElMessage.success(response.message || 'Profile updated')
+    isProfileEditVisible.value = false
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error, 'Failed to update profile.'))
+  } finally {
+    profileSaving.value = false
+  }
+}
+
+const submitPassword = async () => {
+  if (!passwordFormRef.value) return
+
+  const isValid = await passwordFormRef.value.validate().catch(() => false)
+  if (!isValid) return
+
+  passwordSaving.value = true
+
+  try {
+    const response = await $fetch<ChangePasswordResponse>(`${apiBaseUrl.value}/auth/change-password`, {
+      method: 'POST',
+      headers: requestHeaders.value,
+      body: {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+        confirmPassword: passwordForm.confirmPassword
+      }
+    })
+
+    if (response.token && response.data) {
+      setAuth(response)
+    }
+
+    ElMessage.success(response.message || 'Password changed')
+    isPasswordDialogVisible.value = false
+    resetPasswordForm()
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error, 'Failed to change password.'))
+  } finally {
+    passwordSaving.value = false
+  }
+}
+
+const logout = async () => {
+  try {
+    await $fetch(`${apiBaseUrl.value}/auth/logout`, {
+      method: 'POST',
+      headers: requestHeaders.value
+    })
+  } catch (error) {
+    console.error(error)
+  } finally {
+    clearAuth()
+    await navigateTo('/auth/login')
+  }
+}
+
+const handleAccountCommand = async (command: string | number | object) => {
+  if (command === 'login') {
+    await navigateTo('/auth/login')
+    return
+  }
+
+  if (command === 'view-profile') {
+    await openProfileView()
+    return
+  }
+
+  if (command === 'edit-profile') {
+    await openProfileEdit()
+    return
+  }
+
+  if (command === 'change-password') {
+    openPasswordDialog()
+    return
+  }
+
+  if (command === 'logout') {
+    await logout()
+  }
 }
 </script>
