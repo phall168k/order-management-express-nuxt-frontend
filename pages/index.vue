@@ -155,23 +155,30 @@
               <span v-if="Number(product.discount || 0) > 0" class="absolute left-3 top-3 rounded-md bg-rose-600 px-2 py-1 text-xs font-bold text-white">Save {{ formatPrice(product.discount || 0) }}</span>
               <span class="absolute right-3 top-3 rounded-md bg-white/90 px-2 py-1 text-xs font-semibold text-slate-700">{{ getAvailableStock(product.stock) }} left</span>
             </div>
-            <div class="p-4">
-              <div class="mb-3 min-w-0">
-                <p class="text-xs font-medium uppercase tracking-wide text-emerald-700">{{ getCategoryName(product.category) }}</p>
-                <h3 class="mt-1 truncate text-sm font-semibold text-slate-950">{{ product.nameEn }}</h3>
-                <p v-if="product.nameKh" class="mt-1 truncate text-xs text-slate-500">{{ product.nameKh }}</p>
-              </div>
-              <div class="flex items-end justify-between gap-3">
-                <div>
-                  <p class="text-lg font-bold text-emerald-700">{{ formatPrice(getProductFinalPrice(product)) }}</p>
-                  <p v-if="Number(product.discount || 0) > 0" class="text-xs text-slate-400 line-through">{{ formatPrice(product.unitPrice) }}</p>
-                </div>
-                <span class="grid h-10 w-10 place-items-center rounded-lg bg-slate-950 text-white transition group-hover:bg-emerald-700">
-                  <Icon name="lucide:eye" class="h-5 w-5" />
-                </span>
-              </div>
-            </div>
           </button>
+          <div class="p-4">
+            <button class="mb-3 block min-w-0 text-left" type="button" @click="openProductDetail(getProductId(product))">
+              <p class="text-xs font-medium uppercase tracking-wide text-emerald-700">{{ getCategoryName(product.category) }}</p>
+              <h3 class="mt-1 truncate text-sm font-semibold text-slate-950">{{ product.nameEn }}</h3>
+              <p v-if="product.nameKh" class="mt-1 truncate text-xs text-slate-500">{{ product.nameKh }}</p>
+            </button>
+            <div class="flex items-end justify-between gap-3">
+              <button class="text-left" type="button" @click="openProductDetail(getProductId(product))">
+                <p class="text-lg font-bold text-emerald-700">{{ formatPrice(getProductFinalPrice(product)) }}</p>
+                <p v-if="Number(product.discount || 0) > 0" class="text-xs text-slate-400 line-through">{{ formatPrice(product.unitPrice) }}</p>
+              </button>
+              <button
+                class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-slate-950 text-white transition hover:bg-emerald-700 disabled:cursor-wait disabled:bg-emerald-500"
+                type="button"
+                :disabled="isProductBeingPicked(getProductId(product))"
+                aria-label="Add to cart"
+                @click="handlePickProduct(product)"
+              >
+                <Icon v-if="isProductBeingPicked(getProductId(product))" name="lucide:loader-circle" class="h-5 w-5 animate-spin" />
+                <Icon v-else name="lucide:shopping-cart" class="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         </article>
       </div>
 
@@ -233,6 +240,17 @@
               <p class="mt-1 text-lg font-bold text-slate-950">{{ getAvailableStock(selectedProduct.stock) }}</p>
             </div>
           </div>
+
+          <button
+            class="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-md bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-wait disabled:bg-emerald-400"
+            type="button"
+            :disabled="isProductBeingPicked(getProductId(selectedProduct))"
+            @click="handlePickProduct(selectedProduct)"
+          >
+            <Icon v-if="isProductBeingPicked(getProductId(selectedProduct))" name="lucide:loader-circle" class="h-4 w-4 animate-spin" />
+            <Icon v-else name="lucide:shopping-cart" class="h-4 w-4" />
+            Add to cart
+          </button>
         </div>
       </div>
     </el-dialog>
@@ -339,6 +357,7 @@ type DetailResponse<T> = {
 const config = useRuntimeConfig()
 const route = useRoute()
 const authToken = useCookie<string | null>('auth_token')
+const { pickProduct, fetchPickedProducts } = usePickedProducts()
 
 const apiBaseUrl = computed(() => String(config.public.apiBaseUrl).replace(/\/$/, ''))
 const categoriesEndpoint = computed(() => `${apiBaseUrl.value}/master-data/categories/select-options`)
@@ -365,6 +384,7 @@ const productPage = ref(1)
 const productLimit = 10
 const totalProducts = ref(0)
 const loadMoreTarget = ref<HTMLElement | null>(null)
+const pickingProductIds = ref<string[]>([])
 
 let carouselTimer: ReturnType<typeof setInterval> | undefined
 let searchTimer: ReturnType<typeof setTimeout> | undefined
@@ -720,6 +740,26 @@ const openProductDetail = async (productId?: string) => {
   }
 }
 
+const isProductBeingPicked = (productId?: string) => {
+  return Boolean(productId && pickingProductIds.value.includes(productId))
+}
+
+const handlePickProduct = async (product?: ApiProduct | null) => {
+  const productId = getProductId(product || undefined)
+  if (!productId || isProductBeingPicked(productId)) return
+
+  pickingProductIds.value = [...pickingProductIds.value, productId]
+
+  try {
+    await pickProduct(productId)
+    ElMessage.success('Product added to cart')
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error, 'Failed to pick product.'))
+  } finally {
+    pickingProductIds.value = pickingProductIds.value.filter((id) => id !== productId)
+  }
+}
+
 const showNextBanner = () => {
   if (!banners.value.length) return
   activeBanner.value = (activeBanner.value + 1) % banners.value.length
@@ -748,6 +788,7 @@ onMounted(() => {
   refreshCategories()
   refreshBanners()
   resetAndRefreshProducts()
+  fetchPickedProducts().catch(console.error)
 
   carouselTimer = setInterval(showNextBanner, 5000)
 

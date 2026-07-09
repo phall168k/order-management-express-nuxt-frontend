@@ -117,9 +117,19 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <button class="relative grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950" type="button" aria-label="Cart">
+            <button
+              class="relative grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+              type="button"
+              aria-label="Cart"
+              @click="openCartDrawer"
+            >
               <Icon name="lucide:shopping-cart" class="h-5 w-5" />
-              <span class="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-rose-600 px-1 text-[10px] font-bold leading-none text-white">3</span>
+              <span
+                v-if="pickedProductsCount"
+                class="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-rose-600 px-1 text-[10px] font-bold leading-none text-white"
+              >
+                {{ pickedProductsCount > 99 ? '99+' : pickedProductsCount }}
+              </span>
             </button>
           </div>
         </div>
@@ -139,6 +149,78 @@
     <main>
       <slot />
     </main>
+
+    <el-drawer v-model="isCartDrawerVisible" title="Picked products" direction="rtl" size="420px">
+      <div v-loading="isPickedProductsLoading" class="flex min-h-full flex-col">
+        <div v-if="pickedProducts.length" class="flex-1 space-y-3">
+          <div
+            v-for="order in pickedProducts"
+            :key="getPickedOrderId(order)"
+            class="grid grid-cols-[72px_1fr] gap-3 rounded-lg border border-slate-200 bg-white p-3"
+          >
+            <div class="overflow-hidden rounded-md border border-slate-200 bg-slate-100">
+              <img :src="getCartProductImage(order)" :alt="getCartProductName(order)" class="aspect-square h-full w-full object-cover">
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-semibold text-slate-950">{{ getCartProductName(order) }}</p>
+                  <p class="mt-0.5 text-xs text-slate-500">{{ getCartProductCode(order) }}</p>
+                </div>
+                <button
+                  class="grid h-7 w-7 shrink-0 place-items-center rounded-md text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                  type="button"
+                  aria-label="Remove product"
+                  @click="removeCartOrder(order)"
+                >
+                  <Icon name="lucide:trash-2" class="h-4 w-4" />
+                </button>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between gap-3">
+                <div class="flex h-8 items-center rounded-md border border-slate-200">
+                  <button
+                    class="grid h-8 w-8 place-items-center text-slate-500 hover:bg-slate-50 disabled:opacity-40"
+                    type="button"
+                    :disabled="Number(order.quantity || 1) <= 1"
+                    aria-label="Decrease quantity"
+                    @click="updateCartQuantity(order, Number(order.quantity || 1) - 1)"
+                  >
+                    <Icon name="lucide:minus" class="h-4 w-4" />
+                  </button>
+                  <span class="grid h-8 min-w-8 place-items-center border-x border-slate-200 px-2 text-sm font-semibold text-slate-800">{{ order.quantity || 1 }}</span>
+                  <button
+                    class="grid h-8 w-8 place-items-center text-slate-500 hover:bg-slate-50"
+                    type="button"
+                    aria-label="Increase quantity"
+                    @click="updateCartQuantity(order, Number(order.quantity || 1) + 1)"
+                  >
+                    <Icon name="lucide:plus" class="h-4 w-4" />
+                  </button>
+                </div>
+
+                <p class="text-sm font-bold text-emerald-700">{{ formatCartPrice(getCartOrderTotal(order)) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="grid flex-1 place-items-center rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+          <div>
+            <Icon name="lucide:shopping-cart" class="mx-auto h-10 w-10 text-slate-300" />
+            <h3 class="mt-3 text-base font-semibold text-slate-950">No picked products</h3>
+            <p class="mt-1 text-sm text-slate-500">Click a product to add it here.</p>
+          </div>
+        </div>
+
+        <div v-if="pickedProducts.length" class="mt-4 border-t border-slate-200 pt-4">
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-medium text-slate-600">Total</span>
+            <span class="text-lg font-bold text-slate-950">{{ formatCartPrice(cartTotal) }}</span>
+          </div>
+        </div>
+      </div>
+    </el-drawer>
 
     <el-dialog v-model="isProfileViewVisible" title="Profile" width="680px" destroy-on-close>
       <div v-loading="profileLoading" class="min-h-40">
@@ -361,6 +443,7 @@ import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import SingleUpload from '~/@core/components/SingleUpload.vue'
 import type { AuthUser, AuthUserProfile } from '~/composables/useAuth'
+import type { PickedOrder, PickedProduct, PickedProductThumbnail } from '~/composables/usePickedProducts'
 
 const route = useRoute()
 const router = useRouter()
@@ -368,6 +451,16 @@ const { locale, setLocale } = useI18n()
 const config = useRuntimeConfig()
 const authToken = useCookie<string | null>('auth_token')
 const { user, isAuthenticated, setAuth, clearAuth } = useAuth()
+const {
+  pickedProducts,
+  pickedProductsCount,
+  isPickedProductsLoading,
+  fetchPickedProducts,
+  updatePickedQuantity,
+  removePickedProduct,
+  getPickedProductId,
+  getPickedOrderId
+} = usePickedProducts()
 
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
 const currentYear = new Date().getFullYear()
@@ -476,6 +569,7 @@ const minioBucketPathPattern = /\/order-management\/(.+?)(?:\?.*)?$/
 const isProfileViewVisible = ref(false)
 const isProfileEditVisible = ref(false)
 const isPasswordDialogVisible = ref(false)
+const isCartDrawerVisible = ref(false)
 const profileLoading = ref(false)
 const profileSaving = ref(false)
 const passwordSaving = ref(false)
@@ -608,6 +702,144 @@ const getErrorMessage = (error: unknown, fallback: string) => {
   }
 
   return fallback
+}
+
+const cartThumbnailUrlCache = ref<Record<string, string>>({})
+
+const getCartProduct = (order?: PickedOrder): PickedProduct | null => {
+  return typeof order?.product === 'object' && order.product !== null ? order.product : null
+}
+
+const getCartProductName = (order?: PickedOrder) => {
+  const product = getCartProduct(order)
+  return product?.nameEn || product?.nameKh || getPickedProductId(order?.product) || 'Product'
+}
+
+const getCartProductCode = (order?: PickedOrder) => {
+  return getCartProduct(order)?.code || getPickedProductId(order?.product) || '-'
+}
+
+const getCartProductPrice = (order?: PickedOrder) => {
+  const product = getCartProduct(order)
+  return Math.max(Number(product?.unitPrice || 0) - Number(product?.discount || 0), 0)
+}
+
+const getCartOrderTotal = (order?: PickedOrder) => getCartProductPrice(order) * Number(order?.quantity || 1)
+
+const cartTotal = computed(() => pickedProducts.value.reduce((total, order) => total + getCartOrderTotal(order), 0))
+
+const formatCartPrice = (value = 0) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+  }).format(Number(value || 0))
+}
+
+const getCartObjectNameFromThumbnail = (thumbnail?: PickedProductThumbnail): string => {
+  if (!thumbnail) return ''
+
+  if (typeof thumbnail === 'string') {
+    if (thumbnail.startsWith('uploads/')) return ''
+
+    const objectNameFromUrl = thumbnail.match(minioBucketPathPattern)?.[1]
+    if (objectNameFromUrl) return decodeURIComponent(objectNameFromUrl)
+    if (/^https?:\/\//.test(thumbnail)) return ''
+
+    return thumbnail
+  }
+
+  if (thumbnail.data) return getCartObjectNameFromThumbnail(thumbnail.data)
+
+  return thumbnail.objectName
+    || (thumbnail.url?.match(minioBucketPathPattern)?.[1]
+      ? decodeURIComponent(thumbnail.url.match(minioBucketPathPattern)?.[1] || '')
+      : '')
+}
+
+const getCartDirectAssetUrl = (thumbnail?: PickedProductThumbnail) => {
+  if (!thumbnail) return ''
+
+  if (typeof thumbnail !== 'string') {
+    if (getCartObjectNameFromThumbnail(thumbnail)) return ''
+    return thumbnail.secureUrl || thumbnail.secure_url || thumbnail.url || thumbnail.path || ''
+  }
+
+  if (getCartObjectNameFromThumbnail(thumbnail)) return ''
+  if (/^https?:\/\//.test(thumbnail)) return thumbnail
+  if (!thumbnail.startsWith('uploads/')) return ''
+
+  return `${apiBaseUrl.value.replace(/\/api\/v\d+$/, '')}/${thumbnail.replace(/^\//, '')}`
+}
+
+const getCartProductImage = (order?: PickedOrder) => {
+  const thumbnail = getCartProduct(order)?.thumbnail
+  const objectName = getCartObjectNameFromThumbnail(thumbnail)
+  const directUrl = getCartDirectAssetUrl(thumbnail)
+  return (objectName ? cartThumbnailUrlCache.value[objectName] : '') || directUrl || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=300&q=80'
+}
+
+const loadCartThumbnailUrl = async (thumbnail?: PickedProductThumbnail) => {
+  const objectName = getCartObjectNameFromThumbnail(thumbnail)
+  if (!objectName || cartThumbnailUrlCache.value[objectName]) return
+
+  try {
+    const response = await $fetch<{ data?: { url?: string }; url?: string }>('minio/presigned-get', {
+      baseURL: `${apiBaseUrl.value}/`,
+      method: 'post',
+      headers: requestHeaders.value,
+      body: {
+        objectName,
+        expiresInSeconds: 3600
+      }
+    })
+
+    const url = response.data?.url || response.url
+    if (url) {
+      cartThumbnailUrlCache.value = {
+        ...cartThumbnailUrlCache.value,
+        [objectName]: url
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const loadCartProductImages = () => {
+  pickedProducts.value.forEach((order) => loadCartThumbnailUrl(getCartProduct(order)?.thumbnail))
+}
+
+const openCartDrawer = async () => {
+  if (!isAuthenticated.value) {
+    await navigateTo('/auth/login')
+    return
+  }
+
+  isCartDrawerVisible.value = true
+
+  try {
+    await fetchPickedProducts()
+    loadCartProductImages()
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error, 'Failed to load picked products.'))
+  }
+}
+
+const updateCartQuantity = async (order: PickedOrder, quantity: number) => {
+  try {
+    await updatePickedQuantity(order, quantity)
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error, 'Failed to update quantity.'))
+  }
+}
+
+const removeCartOrder = async (order: PickedOrder) => {
+  try {
+    await removePickedProduct(order)
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error, 'Failed to remove product.'))
+  }
 }
 
 const normalizeProfileValue = (value?: ProfileValue): ProfileValue | '' => {
@@ -864,6 +1096,7 @@ const logout = async () => {
   } catch (error) {
     console.error(error)
   } finally {
+    pickedProducts.value = []
     clearAuth()
     await navigateTo('/auth/login')
   }
@@ -894,4 +1127,23 @@ const handleAccountCommand = async (command: string | number | object) => {
     await logout()
   }
 }
+
+watch(
+  pickedProducts,
+  () => loadCartProductImages(),
+  { deep: true }
+)
+
+watch(
+  isAuthenticated,
+  (value) => {
+    if (value) {
+      fetchPickedProducts().then(loadCartProductImages).catch(console.error)
+      return
+    }
+
+    pickedProducts.value = []
+  },
+  { immediate: true }
+)
 </script>
