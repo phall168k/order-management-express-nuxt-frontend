@@ -77,7 +77,13 @@ import type { UploadInstance, UploadProps } from 'element-plus';
 
   const uploadRef = ref<UploadInstance>();
 
-  interface CloudinaryPayload {
+  interface MinioPayload {
+    bucket?: string
+    objectName?: string
+    originalName?: string
+    mimeType?: string
+    size?: number
+    etag?: string
     publicId?: string
     public_id?: string
     fileName?: string
@@ -97,7 +103,7 @@ import type { UploadInstance, UploadProps } from 'element-plus';
     original_filename?: string
   }
 
-  type FileData = CloudinaryPayload | string
+  type FileData = MinioPayload | string
 
   const props = withDefaults(
      defineProps<{
@@ -111,7 +117,7 @@ import type { UploadInstance, UploadProps } from 'element-plus';
   )
 
   const emit = defineEmits(['update:modelValue']);
-   const accessToken = useCookie('token');
+   const accessToken = useCookie<string | null>('auth_token');
   const uploadHeaders  = computed(() => accessToken.value
     ? { Authorization: `Bearer ${accessToken.value}` }
     : {}
@@ -119,7 +125,8 @@ import type { UploadInstance, UploadProps } from 'element-plus';
 
   const config = useRuntimeConfig();
   const apiBaseUrl = computed(() => config.public.apiBaseUrl ?? '');
-  const uploadUrl = computed(() => `${apiBaseUrl.value}cloudinary/upload`);
+  const apiUrl = (path: string) => `${String(apiBaseUrl.value).replace(/\/$/, '')}/${path.replace(/^\//, '')}`
+  const uploadUrl = computed(() => apiUrl('minio/upload'));
   
   const files = ref<FileData[]>([]);
   const uploadingCount = ref(0);
@@ -149,66 +156,62 @@ import type { UploadInstance, UploadProps } from 'element-plus';
     return true;
   }
 
-  const getCloudinaryPayload = (response: unknown): CloudinaryPayload | string | null => {
+  const getMinioPayload = (response: unknown): MinioPayload | string | null => {
     if (typeof response === 'string') return response
 
     if (typeof response === 'object' && response !== null) {
       const result = response as {
-        payload?: CloudinaryPayload | string | { data?: CloudinaryPayload | string }
-        data?: CloudinaryPayload | string
+        payload?: MinioPayload | string | { data?: MinioPayload | string }
+        data?: MinioPayload | string
       }
 
       if (typeof result.payload === 'object' && result.payload !== null && 'data' in result.payload) {
         return result.payload.data ?? null
       }
 
-      return result.payload ?? result.data ?? result as CloudinaryPayload
+      return result.payload ?? result.data ?? result as MinioPayload
     }
 
     return null
   }
 
-  const getPublicId = (file: FileData | CloudinaryPayload | string) => {
+  const getObjectName = (file: FileData | MinioPayload | string) => {
     if (typeof file === 'string') return file
 
-    return file.publicId || file.public_id || file.fileName || file.filename || null
+    return file.objectName || file.publicId || file.public_id || file.fileName || file.filename || null
   }
 
-  const getDisplayFileName = (file: FileData | CloudinaryPayload | string) => {
+  const getDisplayFileName = (file: FileData | MinioPayload | string) => {
     if (typeof file === 'string') return file
 
-    return file.fileName
+    return file.originalName
+      || file.fileName
       || file.filename
       || file.originalFilename
       || file.original_filename
       || file.displayName
       || file.display_name
       || file.name
+      || file.objectName
       || file.publicId
       || file.public_id
       || '-'
   }
 
-  const getDirectPreviewLink = (file: FileData | CloudinaryPayload | string) => {
+  const getDirectPreviewLink = (file: FileData | MinioPayload | string) => {
     if (typeof file === 'string') return null
 
     return file.secureUrl ?? file.secure_url ?? file.url ?? file.path ?? null
   }
 
-  const getResourceType = (file: FileData | CloudinaryPayload | string) => {
-    if (typeof file === 'string') return props.resourceType
-
-    return file.resourceType ?? file.resource_type ?? props.resourceType
-  }
-
-  const normalizeFileData = (file: FileData | CloudinaryPayload | string): FileData => {
+  const normalizeFileData = (file: FileData | MinioPayload | string): FileData => {
     if (typeof file === 'string') return file
 
-    const publicId = getPublicId(file)
+    const objectName = getObjectName(file)
 
     return {
       ...file,
-      ...(publicId ? { publicId } : {}),
+      ...(objectName ? { objectName } : {}),
       fileName: getDisplayFileName(file),
     }
   }
@@ -220,7 +223,8 @@ import type { UploadInstance, UploadProps } from 'element-plus';
 
     if (typeof response === 'object' && response !== null) {
       const result = response as {
-        payload?: string | Record<string, string>
+        payload?: string | Record<string, string> | { data?: string | Record<string, string> }
+        data?: string | Record<string, string>
         url?: string
         secureUrl?: string
         secure_url?: string
@@ -234,22 +238,28 @@ import type { UploadInstance, UploadProps } from 'element-plus';
           ?? result.payload.secure_url
           ?? result.payload.url
           ?? result.payload.path
+          ?? (typeof result.payload.data === 'object' && result.payload.data !== null ? result.payload.data.url : null)
           ?? null
       }
 
-      return result.secureUrl ?? result.secure_url ?? result.url ?? result.path ?? null
+      return result.secureUrl
+        ?? result.secure_url
+        ?? result.url
+        ?? result.path
+        ?? (typeof result.data === 'object' && result.data !== null ? result.data.url : null)
+        ?? null
     }
 
     return null
   }
 
   const handleSuccess: UploadProps['onSuccess'] = (response) => {
-    const payload = getCloudinaryPayload(response)
-    const publicId = payload && typeof payload === 'object'
-      ? payload.publicId ?? payload.public_id
+    const payload = getMinioPayload(response)
+    const objectName = payload && typeof payload === 'object'
+      ? getObjectName(payload)
       : payload
 
-    if (!publicId) {
+    if (!objectName) {
       useMessage('Upload failed', 'error')
       finishUpload()
       return
@@ -257,10 +267,10 @@ import type { UploadInstance, UploadProps } from 'element-plus';
 
     const file: FileData = {
       ...(typeof payload === 'object' ? payload : {}),
-      publicId,
+      objectName,
       fileName: typeof payload === 'object'
-        ? getDisplayFileName({ ...payload, publicId })
-        : publicId,
+        ? getDisplayFileName({ ...payload, objectName })
+        : objectName,
     }
     files.value = [...files.value, file];
     emit('update:modelValue', [...files.value]);
@@ -274,10 +284,10 @@ import type { UploadInstance, UploadProps } from 'element-plus';
   }
 
   const handleOpenFile = async (file: FileData) => {
-    const publicId = getPublicId(file)
+    const objectName = getObjectName(file)
 
-    if (!publicId) {
-      useNotification('Missing file public id', 'error')
+    if (!objectName) {
+      useNotification('Missing file object name', 'error')
       return
     }
 
@@ -289,13 +299,13 @@ import type { UploadInstance, UploadProps } from 'element-plus';
         return
       }
 
-      const response: any = await $fetch('cloudinary/preview', {
+      const response: any = await $fetch('minio/presigned-get', {
         baseURL: apiBaseUrl.value,
-        method: 'get',
+        method: 'post',
         headers: uploadHeaders.value,
-        query: {
-          publicId,
-          resourceType: getResourceType(file),
+        body: {
+          objectName,
+          expiresInSeconds: 3600,
         },
       });
       const previewLink = getPreviewLinkFromResponse(response)
@@ -314,11 +324,11 @@ import type { UploadInstance, UploadProps } from 'element-plus';
   }
   
   const handleDeleteFile = async (file: FileData, index: number) => {
-    const publicId = getPublicId(file)
+    const objectName = getObjectName(file)
     const fileName = getDisplayFileName(file)
 
-    if (!publicId) {
-      useNotification('Missing file public id', 'error')
+    if (!objectName) {
+      useNotification('Missing file object name', 'error')
       return
     }
 
@@ -370,8 +380,13 @@ import type { UploadInstance, UploadProps } from 'element-plus';
     }
 
     try {
-      await useApi(`cloudinary?publicId=${encodeURIComponent(publicId)}`, {
+      await $fetch('minio', {
+        baseURL: apiBaseUrl.value,
         method: 'delete',
+        headers: uploadHeaders.value,
+        query: {
+          objectName,
+        },
       })
 
       useMessage($t('file_deleted_successfully', { fileName }))

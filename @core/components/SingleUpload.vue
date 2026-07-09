@@ -76,9 +76,18 @@
 import { UploadFilled } from '@element-plus/icons-vue'
 import type { UploadInstance, UploadProps } from 'element-plus'
 
-type CloudinaryValue = string | {
+type MinioValue = string | {
+  bucket?: string
+  objectName?: string
+  originalName?: string
+  mimeType?: string
+  size?: number
+  etag?: string
   publicId?: string
   public_id?: string
+  fileName?: string
+  filename?: string
+  name?: string
   url?: string
   secureUrl?: string
   secure_url?: string
@@ -91,9 +100,11 @@ type CloudinaryValue = string | {
   original_filename?: string
 }
 
+const minioBucketPathPattern = /\/order-management\/(.+?)(?:\?.*)?$/
+
 const props = withDefaults(
   defineProps<{
-    modelValue?: CloudinaryValue | null
+    modelValue?: MinioValue | null
     headers?: Record<string, string>
     accept?: string
     maxSizeMB?: number
@@ -114,13 +125,13 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: CloudinaryValue | null): void
+  (e: 'update:modelValue', value: MinioValue | null): void
   (e: 'success', value: unknown): void
   (e: 'error', value: unknown): void
 }>()
 
 const config = useRuntimeConfig()
-const token = useCookie<string | null>('token')
+const token = useCookie<string | null>('auth_token')
 const uploadRef = ref<UploadInstance>()
 const loading = ref(false)
 const deleting = ref(false)
@@ -128,21 +139,54 @@ const previewLoading = ref(false)
 const fetchedPreviewLink = ref<string | null>(null)
 
 const apiBaseUrl = computed(() => config.public.apiBaseUrl ?? '')
-const uploadUrl = computed(() => `${apiBaseUrl.value}cloudinary/upload`)
+const apiUrl = (path: string) => `${String(apiBaseUrl.value).replace(/\/$/, '')}/${path.replace(/^\//, '')}`
+const uploadUrl = computed(() => apiUrl('minio/upload'))
 const uploadHeaders = computed(() => ({
   ...(token.value ? { Authorization: `Bearer ${token.value}` } : {}),
   ...props.headers,
 }))
 
-const publicId = computed(() => {
-  if (!props.modelValue) return null
-  if (typeof props.modelValue === 'string') return props.modelValue
+const getObjectNameFromValue = (value?: MinioValue | null) => {
+  if (!value) return null
 
-  return props.modelValue.publicId ?? props.modelValue.public_id ?? null
+  if (typeof value === 'string') {
+    const minioObjectName = value.match(minioBucketPathPattern)?.[1]
+    if (value.startsWith('uploads/') || (/^https?:\/\//.test(value) && !minioObjectName)) return null
+
+    return minioObjectName ? decodeURIComponent(minioObjectName) : value
+  }
+
+  const objectNameFromUrl = value.url?.match(minioBucketPathPattern)?.[1]
+
+  return value.objectName
+    ?? value.publicId
+    ?? value.public_id
+    ?? value.fileName
+    ?? value.filename
+    ?? (objectNameFromUrl ? decodeURIComponent(objectNameFromUrl) : null)
+}
+
+const hasMinioObjectName = computed(() => Boolean(getObjectNameFromValue(props.modelValue)))
+
+const objectName = computed(() => {
+  if (!props.modelValue) return null
+
+  return getObjectNameFromValue(props.modelValue)
 })
 
 const directPreviewLink = computed(() => {
-  if (!props.modelValue || typeof props.modelValue === 'string') return null
+  if (!props.modelValue) return null
+
+  if (typeof props.modelValue === 'string') {
+    if (/^https?:\/\//.test(props.modelValue) && !hasMinioObjectName.value) return props.modelValue
+    if (props.modelValue.startsWith('uploads/')) {
+      return `${String(apiBaseUrl.value).replace(/\/api\/v\d+\/?$/, '')}/${props.modelValue.replace(/^\//, '')}`
+    }
+
+    return null
+  }
+
+  if (hasMinioObjectName.value) return null
 
   return props.modelValue.secureUrl
     ?? props.modelValue.secure_url
@@ -165,7 +209,8 @@ const getPreviewLinkFromResponse = (response: unknown) => {
 
   if (typeof response === 'object' && response !== null) {
     const result = response as {
-      payload?: string | Record<string, string>
+      payload?: string | Record<string, string> | { data?: string | Record<string, string> }
+      data?: string | Record<string, string>
       url?: string
       secureUrl?: string
       secure_url?: string
@@ -179,27 +224,34 @@ const getPreviewLinkFromResponse = (response: unknown) => {
         ?? result.payload.secure_url
         ?? result.payload.url
         ?? result.payload.path
+        ?? (typeof result.payload.data === 'object' && result.payload.data !== null ? result.payload.data.url : null)
         ?? null
     }
 
-    return result.secureUrl ?? result.secure_url ?? result.url ?? result.path ?? null
+    return result.secureUrl
+      ?? result.secure_url
+      ?? result.url
+      ?? result.path
+      ?? (typeof result.data === 'object' && result.data !== null ? result.data.url : null)
+      ?? null
   }
 
   return null
 }
 
 const loadPreview = async () => {
-  if (!publicId.value || directPreviewLink.value) return
+  if (!objectName.value || directPreviewLink.value) return
 
   try {
     previewLoading.value = true
-    const response = await $fetch('cloudinary/preview', {
+
+    const response = await $fetch('minio/presigned-get', {
       baseURL: apiBaseUrl.value,
-      method: 'get',
+      method: 'post',
       headers: uploadHeaders.value,
-      query: {
-        publicId: publicId.value,
-        resourceType: props.resourceType,
+      body: {
+        objectName: objectName.value,
+        expiresInSeconds: 3600,
       },
     })
 
@@ -227,10 +279,20 @@ const beforeUpload: UploadProps['beforeUpload'] = (file) => {
 }
 
 const handleSuccess: UploadProps['onSuccess'] = (response) => {
-  const payload = (response as { payload?: CloudinaryValue })?.payload ?? response
+  const result = response as {
+    payload?: MinioValue | { data?: MinioValue }
+    data?: MinioValue
+  }
+  const payload = (
+    typeof result?.payload === 'object'
+    && result.payload !== null
+    && 'data' in result.payload
+      ? result.payload.data
+      : result?.payload
+  ) ?? result?.data ?? response
 
   fetchedPreviewLink.value = getPreviewLinkFromResponse(payload)
-  emit('update:modelValue', payload as CloudinaryValue)
+  emit('update:modelValue', payload as MinioValue)
   emit('success', response)
   loading.value = false
   uploadRef.value?.clearFiles()
@@ -244,7 +306,7 @@ const handleError: UploadProps['onError'] = (error) => {
 }
 
 const deleteFile = async () => {
-  if (!publicId.value) {
+  if (!objectName.value) {
     fetchedPreviewLink.value = null
     emit('update:modelValue', null)
     return
@@ -252,13 +314,12 @@ const deleteFile = async () => {
 
   try {
     deleting.value = true
-    await $fetch('cloudinary', {
+    await $fetch('minio', {
       baseURL: apiBaseUrl.value,
       method: 'delete',
       headers: uploadHeaders.value,
       query: {
-        publicId: publicId.value,
-        resourceType: props.resourceType,
+        objectName: objectName.value,
       },
     })
 
