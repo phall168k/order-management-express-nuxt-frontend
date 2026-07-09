@@ -25,10 +25,10 @@
           <template #default="{ row }">
             <div class="grid h-12 w-12 place-items-center overflow-hidden rounded border border-slate-200 bg-slate-50">
               <img
-                v-if="row.thumbnail"
+                v-if="getProductThumbnailUrl(row.thumbnail)"
                 :alt="row.nameEn"
                 class="h-full w-full object-cover"
-                :src="getThumbnailUrl(row.thumbnail)"
+                :src="getProductThumbnailUrl(row.thumbnail)"
               >
               <Icon v-else name="lucide:image" class="h-5 w-5 text-slate-400" />
             </div>
@@ -86,7 +86,7 @@
     <el-dialog
       v-model="isDialogVisible"
       :title="isEditing ? t('products.dialog.editTitle') : t('products.dialog.createTitle')"
-      width="760px"
+      fullscreen
       destroy-on-close
       draggable
     >
@@ -95,73 +95,84 @@
         :model="form"
         :rules="rules"
         label-position="top"
+        id="product-form"
         @submit.prevent="submitProduct"
       >
-        <el-form-item :label="t('products.code')" prop="code">
-          <el-input v-model="form.code" :placeholder="t('products.placeholders.code')" />
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="16">
+            <el-form-item :label="t('products.code')" prop="code">
+              <el-input v-model="form.code" :placeholder="t('products.placeholders.code')" />
+            </el-form-item>
 
-        <el-form-item :label="t('products.category')" prop="category">
-          <el-select
-            v-model="form.category"
-            class="w-full"
-            filterable
-            :loading="isLoadingCategories"
-            :placeholder="t('products.placeholders.category')"
-          >
-            <el-option
-              v-for="category in categoryOptions"
-              :key="category._id"
-              :label="getCategoryOptionLabel(category)"
-              :value="category._id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="t('products.nameEn')" prop="nameEn">
-          <el-input v-model="form.nameEn" :placeholder="t('products.placeholders.nameEn')" />
-        </el-form-item>
-        <el-form-item :label="t('products.nameKh')" prop="nameKh">
-          <el-input v-model="form.nameKh" :placeholder="t('products.placeholders.nameKh')" />
-        </el-form-item>
-        <el-form-item :label="t('products.unitPrice')" prop="unitPrice">
-          <el-input-number
-            v-model="form.unitPrice"
-            :min="0"
-            :precision="2"
-            :step="0.5"
-            class="!w-full"
-            controls-position="right"
-          />
-        </el-form-item>
-        <el-form-item :label="t('products.discount')" prop="discount">
-          <el-input-number
-            v-model="form.discount"
-            :min="0"
-            :max="form.unitPrice"
-            :precision="2"
-            :step="0.5"
-            class="!w-full"
-            controls-position="right"
-          />
-        </el-form-item>
-        <el-form-item :label="t('products.thumbnail')" prop="thumbnail">
-          <el-input v-model="form.thumbnail" :placeholder="t('products.placeholders.thumbnail')" />
-        </el-form-item>
-
-        <el-form-item :label="t('common.description')" prop="description">
-          <el-input
-            v-model="form.description"
-            :placeholder="t('products.placeholders.description')"
-            :rows="3"
-            type="textarea"
-          />
-        </el-form-item>
+            <el-form-item :label="t('products.category')" prop="category">
+              <el-select
+                v-model="form.category"
+                class="w-full"
+                filterable
+                :loading="isLoadingCategories"
+                :placeholder="t('products.placeholders.category')"
+              >
+                <el-option
+                  v-for="category in categoryOptions"
+                  :key="category._id"
+                  :label="getCategoryOptionLabel(category)"
+                  :value="category._id"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item :label="t('products.nameEn')" prop="nameEn">
+              <el-input v-model="form.nameEn" :placeholder="t('products.placeholders.nameEn')" />
+            </el-form-item>
+            <el-form-item :label="t('products.nameKh')" prop="nameKh">
+              <el-input v-model="form.nameKh" :placeholder="t('products.placeholders.nameKh')" />
+            </el-form-item>
+            <el-form-item :label="t('products.unitPrice')" prop="unitPrice">
+              <el-input-number
+                v-model="form.unitPrice"
+                :min="0"
+                :precision="2"
+                step="any"
+                class="!w-full"
+                controls-position="right"
+              />
+            </el-form-item>
+            <el-form-item :label="t('products.discount')" prop="discount">
+              <el-input-number
+                v-model="form.discount"
+                :min="0"
+                :max="form.unitPrice"
+                :precision="2"
+                step="any"
+                class="!w-full"
+                controls-position="right"
+              />
+            </el-form-item>
+            <el-form-item :label="t('common.description')" prop="description">
+              <el-input
+                v-model="form.description"
+                :placeholder="t('products.placeholders.description')"
+                :rows="3"
+                type="textarea"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item :label="t('products.thumbnail')" prop="thumbnail">
+              <SingleUpload v-model="thumbnailUploadValue" class="w-full"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
 
       <template #footer>
         <div class="flex justify-end gap-2">
           <el-button @click="isDialogVisible = false">{{ t('common.cancel') }}</el-button>
-          <el-button type="primary" :loading="isSaving" @click="submitProduct">
+          <el-button
+            type="primary"
+            native-type="submit"
+            form="product-form"
+            :loading="isSaving"
+          >
             {{ isEditing ? t('products.actions.save') : t('products.actions.create') }}
           </el-button>
         </div>
@@ -173,6 +184,7 @@
 <script lang="ts" setup>
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import SingleUpload from '~/@core/components/SingleUpload.vue'
 
 definePageMeta({
   layout: 'admin',
@@ -190,7 +202,7 @@ type ApiProduct = {
   unitPrice: number
   discount?: number
   description?: string
-  thumbnail?: string
+  thumbnail?: ProductThumbnail
 }
 
 type CategoryOption = {
@@ -208,7 +220,31 @@ type ProductForm = {
   unitPrice: number
   discount: number
   description: string
-  thumbnail: string
+  thumbnail: ProductThumbnail
+}
+
+type MinioUploadObject = {
+  bucket?: string
+  objectName?: string
+  originalName?: string
+  mimeType?: string
+  size?: number
+  etag?: string
+  publicId?: string
+  public_id?: string
+  fileName?: string
+  filename?: string
+  url?: string
+  secureUrl?: string
+  secure_url?: string
+  path?: string
+  data?: ProductThumbnail
+}
+
+type ProductThumbnail = string | MinioUploadObject | null
+
+type ProductPayload = Omit<ProductForm, 'thumbnail'> & {
+  thumbnail?: MinioUploadObject
 }
 
 type CategoryResponse = CategoryOption[] | {
@@ -255,6 +291,7 @@ const isSaving = ref(false)
 const isDialogVisible = ref(false)
 const editingProductId = ref<string | null>(null)
 const productFormRef = ref<FormInstance>()
+const thumbnailUrlCache = ref<Record<string, string>>({})
 
 const form = reactive<ProductForm>({
   code: '',
@@ -264,13 +301,14 @@ const form = reactive<ProductForm>({
   unitPrice: 0,
   discount: 0,
   description: '',
-  thumbnail: ''
+  thumbnail: null
 })
 
 const isEditing = computed(() => Boolean(editingProductId.value))
 const canCreateProduct = computed(() => hasPermission('product.create'))
 const canUpdateProduct = computed(() => hasPermission('product.update'))
 const canDeleteProduct = computed(() => hasPermission('product.delete'))
+const minioBucketPathPattern = /\/order-management\/(.+?)(?:\?.*)?$/
 
 const validateDiscount = (_rule: unknown, value: number, callback: (error?: Error) => void) => {
   if (Number(value || 0) > Number(form.unitPrice || 0)) {
@@ -376,15 +414,125 @@ const getErrorMessage = (error: unknown) => {
   return t('common.errors.generic')
 }
 
+const normalizeThumbnailValue = (value?: ProductThumbnail): ProductThumbnail | '' => {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  if (value.data) return normalizeThumbnailValue(value.data)
+
+  return value
+}
+
+const normalizeThumbnailForPayload = (value?: ProductThumbnail): MinioUploadObject | null => {
+  const thumbnail = normalizeThumbnailValue(value)
+  if (!thumbnail || typeof thumbnail === 'string') return null
+
+  const objectName = getThumbnailObjectName(thumbnail)
+  if (!objectName) return null
+
+  return {
+    ...thumbnail,
+    objectName
+  }
+}
+
+const thumbnailUploadValue = computed<ProductThumbnail>({
+  get: () => form.thumbnail || null,
+  set: (value) => {
+    form.thumbnail = normalizeThumbnailValue(value) || null
+  }
+})
+
 const buildQuery = () => ({
   page: currentPage.value,
   limit: pageSize.value,
   ...(search.value.trim() ? { search: search.value.trim() } : {})
 })
 
-const getThumbnailUrl = (thumbnail: string) => {
+const getThumbnailUrl = (thumbnail?: ProductThumbnail) => {
+  if (!thumbnail) return ''
+
+  if (typeof thumbnail !== 'string') {
+    if (getThumbnailObjectName(thumbnail)) return ''
+
+    return thumbnail.secureUrl || thumbnail.secure_url || thumbnail.url || thumbnail.path || ''
+  }
+
   if (/^https?:\/\//.test(thumbnail)) return thumbnail
+  if (!thumbnail.startsWith('uploads/')) return ''
+
   return `${apiBaseUrl.value.replace(/\/api\/v\d+$/, '')}/${thumbnail.replace(/^\//, '')}`
+}
+
+const getThumbnailObjectName = (thumbnail?: ProductThumbnail) => {
+  if (!thumbnail) return ''
+
+  if (typeof thumbnail !== 'string') {
+    if (thumbnail.data) return getThumbnailObjectName(thumbnail.data)
+
+    return thumbnail.objectName
+      || thumbnail.publicId
+      || thumbnail.public_id
+      || thumbnail.fileName
+      || thumbnail.filename
+      || (thumbnail.url?.match(minioBucketPathPattern)?.[1]
+        ? decodeURIComponent(thumbnail.url.match(minioBucketPathPattern)?.[1] || '')
+        : '')
+  }
+
+  if (thumbnail.startsWith('uploads/')) return ''
+
+  const objectNameFromUrl = thumbnail.match(minioBucketPathPattern)?.[1]
+  if (objectNameFromUrl) return decodeURIComponent(objectNameFromUrl)
+  if (/^https?:\/\//.test(thumbnail)) return ''
+
+  return thumbnail
+}
+
+const getThumbnailCacheKey = (thumbnail?: ProductThumbnail) => {
+  if (!thumbnail) return ''
+
+  return getThumbnailObjectName(thumbnail) || getThumbnailUrl(thumbnail)
+}
+
+const getProductThumbnailUrl = (thumbnail?: ProductThumbnail) => {
+  if (!thumbnail) return ''
+
+  const cacheKey = getThumbnailCacheKey(thumbnail)
+
+  return (cacheKey ? thumbnailUrlCache.value[cacheKey] : '') || getThumbnailUrl(thumbnail)
+}
+
+const loadThumbnailUrl = async (thumbnail?: ProductThumbnail) => {
+  const objectName = getThumbnailObjectName(thumbnail)
+  if (!thumbnail || !objectName || thumbnailUrlCache.value[objectName]) return
+
+  try {
+    const response = await $fetch<{ data?: { url?: string }; url?: string }>('minio/presigned-get', {
+      baseURL: `${apiBaseUrl.value}/`,
+      method: 'post',
+      headers: requestHeaders.value,
+      body: {
+        objectName,
+        expiresInSeconds: 3600
+      }
+    })
+
+    const url = response.data?.url || response.url
+    if (url) {
+      thumbnailUrlCache.value = {
+        ...thumbnailUrlCache.value,
+        [objectName]: url
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const loadProductThumbnailUrls = (items: ApiProduct[]) => {
+  items.forEach((item) => {
+    loadThumbnailUrl(item.thumbnail)
+  })
 }
 
 const formatPrice = (value: number) => {
@@ -429,6 +577,7 @@ const refreshProducts = async () => {
       unitPrice: Number(product.unitPrice || 0),
       discount: Number(product.discount || 0)
     }))
+    loadProductThumbnailUrls(products.value)
     totalItems.value = getTotalItems(response, items)
   } catch (error) {
     ElMessage.error(getErrorMessage(error))
@@ -447,7 +596,7 @@ const resetForm = () => {
     unitPrice: 0,
     discount: 0,
     description: '',
-    thumbnail: ''
+    thumbnail: null
   })
   productFormRef.value?.clearValidate()
 }
@@ -471,22 +620,30 @@ const openEditDialog = (product: ApiProduct) => {
     unitPrice: Number(product.unitPrice || 0),
     discount: Number(product.discount || 0),
     description: product.description || '',
-    thumbnail: product.thumbnail || ''
+    thumbnail: normalizeThumbnailValue(product.thumbnail) || null
   })
   ensureSelectedCategoryOption(product.category)
   isDialogVisible.value = true
 }
 
-const buildPayload = (): ProductForm => ({
-  code: form.code.trim(),
-  nameEn: form.nameEn.trim(),
-  nameKh: form.nameKh.trim(),
-  category: form.category,
-  unitPrice: Number(form.unitPrice || 0),
-  discount: Number(form.discount || 0),
-  description: form.description.trim(),
-  thumbnail: form.thumbnail.trim()
-})
+const buildPayload = (): ProductPayload => {
+  const payload: ProductPayload = {
+    code: form.code.trim(),
+    nameEn: form.nameEn.trim(),
+    nameKh: form.nameKh.trim(),
+    category: form.category,
+    unitPrice: Number(form.unitPrice || 0),
+    discount: Number(form.discount || 0),
+    description: form.description.trim(),
+  }
+  const thumbnail = normalizeThumbnailForPayload(form.thumbnail)
+
+  if (thumbnail) {
+    payload.thumbnail = thumbnail
+  }
+
+  return payload
+}
 
 const submitProduct = async () => {
   if (!productFormRef.value) return
@@ -578,5 +735,9 @@ onMounted(() => {
 
 :deep(.el-input-number .el-input__wrapper) {
   width: 100%;
+}
+
+:global(.el-message) {
+  z-index: 100001 !important;
 }
 </style>

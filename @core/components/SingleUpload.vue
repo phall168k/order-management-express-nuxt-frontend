@@ -8,7 +8,7 @@
       <img
         :src="previewLink"
         alt="Uploaded file"
-        class="object-contain"
+        class="object-cover"
         :style="previewImageStyle"
       >
       <div class="flex items-center justify-end gap-2 border-t border-slate-200 bg-white p-2">
