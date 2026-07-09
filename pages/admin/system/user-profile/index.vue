@@ -25,10 +25,10 @@
           <template #default="{ row }">
             <div class="grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-50">
               <img
-                v-if="row.profile"
+                v-if="getUserProfileUrl(row.profile)"
                 :alt="getFullName(row)"
                 class="h-full w-full object-cover"
-                :src="getProfileUrl(row.profile)"
+                :src="getUserProfileUrl(row.profile)"
               >
               <Icon v-else name="lucide:user-round" class="h-5 w-5 text-slate-400" />
             </div>
@@ -91,7 +91,7 @@
     <el-dialog
       v-model="isDialogVisible"
       :title="isEditing ? t('userProfiles.dialog.editTitle') : t('userProfiles.dialog.createTitle')"
-      width="760px"
+      fullscreen
       destroy-on-close
       draggable
     >
@@ -100,87 +100,98 @@
         :model="form"
         :rules="rules"
         label-position="top"
+        id="user-profile-form"
         @submit.prevent="submitUserProfile"
       >
-        <div class="grid gap-4 md:grid-cols-2">
-          <el-form-item :label="t('userProfiles.code')" prop="code">
-            <el-input v-model="form.code" :placeholder="t('userProfiles.placeholders.code')" />
-          </el-form-item>
+        <el-row :gutter="25">
+          <el-col :span="16">
+            <div class="grid gap-4 md:grid-cols-2">
+              <el-form-item :label="t('userProfiles.code')" prop="code">
+                <el-input v-model="form.code" :placeholder="t('userProfiles.placeholders.code')" />
+              </el-form-item>
 
-          <el-form-item :label="t('userProfiles.userType')" prop="userType">
-            <el-select v-model="form.userType" class="w-full" :placeholder="t('userProfiles.placeholders.userType')">
-              <el-option
-                v-for="option in userTypeOptions"
-                :key="option.value"
-                :label="option.label"
-                :value="option.value"
+              <el-form-item :label="t('userProfiles.userType')" prop="userType">
+                <el-select v-model="form.userType" class="w-full" :placeholder="t('userProfiles.placeholders.userType')">
+                  <el-option
+                    v-for="option in userTypeOptions"
+                    :key="option.value"
+                    :label="option.label"
+                    :value="option.value"
+                  />
+                </el-select>
+              </el-form-item>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+              <el-form-item :label="t('userProfiles.firstName')" prop="firstName">
+                <el-input v-model="form.firstName" :placeholder="t('userProfiles.placeholders.firstName')" />
+              </el-form-item>
+
+              <el-form-item :label="t('userProfiles.lastName')" prop="lastName">
+                <el-input v-model="form.lastName" :placeholder="t('userProfiles.placeholders.lastName')" />
+              </el-form-item>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+              <el-form-item :label="t('userProfiles.gender')" prop="gender">
+                <el-select v-model="form.gender" class="w-full" :placeholder="t('userProfiles.placeholders.gender')">
+                  <el-option
+                    v-for="option in genderOptions"
+                    :key="option.value"
+                    :label="option.label"
+                    :value="option.value"
+                  />
+                </el-select>
+              </el-form-item>
+
+              <el-form-item :label="t('userProfiles.dob')" prop="dob">
+                <el-date-picker
+                  v-model="form.dob"
+                  class="!w-full"
+                  format="YYYY-MM-DD"
+                  type="date"
+                  value-format="YYYY-MM-DD"
+                  :placeholder="t('userProfiles.placeholders.dob')"
+                />
+              </el-form-item>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+              <el-form-item :label="t('userProfiles.phoneNumber')" prop="phoneNumber">
+                <el-input v-model="form.phoneNumber" :placeholder="t('userProfiles.placeholders.phoneNumber')" />
+              </el-form-item>
+            </div>
+
+            <el-form-item :label="t('userProfiles.address')" prop="address">
+              <el-input v-model="form.address" :placeholder="t('userProfiles.placeholders.address')" />
+            </el-form-item>
+
+            <el-form-item :label="t('userProfiles.note')" prop="note">
+              <el-input
+                v-model="form.note"
+                :placeholder="t('userProfiles.placeholders.note')"
+                :rows="3"
+                type="textarea"
               />
-            </el-select>
-          </el-form-item>
-        </div>
-
-        <div class="grid gap-4 md:grid-cols-2">
-          <el-form-item :label="t('userProfiles.firstName')" prop="firstName">
-            <el-input v-model="form.firstName" :placeholder="t('userProfiles.placeholders.firstName')" />
-          </el-form-item>
-
-          <el-form-item :label="t('userProfiles.lastName')" prop="lastName">
-            <el-input v-model="form.lastName" :placeholder="t('userProfiles.placeholders.lastName')" />
-          </el-form-item>
-        </div>
-
-        <div class="grid gap-4 md:grid-cols-2">
-          <el-form-item :label="t('userProfiles.gender')" prop="gender">
-            <el-select v-model="form.gender" class="w-full" :placeholder="t('userProfiles.placeholders.gender')">
-              <el-option
-                v-for="option in genderOptions"
-                :key="option.value"
-                :label="option.label"
-                :value="option.value"
-              />
-            </el-select>
-          </el-form-item>
-
-          <el-form-item :label="t('userProfiles.dob')" prop="dob">
-            <el-date-picker
-              v-model="form.dob"
-              class="!w-full"
-              format="YYYY-MM-DD"
-              type="date"
-              value-format="YYYY-MM-DD"
-              :placeholder="t('userProfiles.placeholders.dob')"
-            />
-          </el-form-item>
-        </div>
-
-        <div class="grid gap-4 md:grid-cols-2">
-          <el-form-item :label="t('userProfiles.phoneNumber')" prop="phoneNumber">
-            <el-input v-model="form.phoneNumber" :placeholder="t('userProfiles.placeholders.phoneNumber')" />
-          </el-form-item>
-        </div>
-
-        <el-form-item :label="t('userProfiles.address')" prop="address">
-          <el-input v-model="form.address" :placeholder="t('userProfiles.placeholders.address')" />
-        </el-form-item>
-
-        <el-form-item :label="t('userProfiles.profile')" prop="profile">
-          <el-input v-model="form.profile" :placeholder="t('userProfiles.placeholders.profile')" />
-        </el-form-item>
-
-        <el-form-item :label="t('userProfiles.note')" prop="note">
-          <el-input
-            v-model="form.note"
-            :placeholder="t('userProfiles.placeholders.note')"
-            :rows="3"
-            type="textarea"
-          />
-        </el-form-item>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item :label="t('userProfiles.profile')" prop="profile">
+              <SingleUpload v-model="profileUploadValue" class="w-full"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
 
       <template #footer>
         <div class="flex justify-end gap-2">
           <el-button @click="isDialogVisible = false">{{ t('common.cancel') }}</el-button>
-          <el-button type="primary" :loading="isSaving" @click="submitUserProfile">
+          <el-button
+            type="primary"
+            native-type="submit"
+            form="user-profile-form"
+            :loading="isSaving"
+          >
             {{ isEditing ? t('userProfiles.actions.save') : t('userProfiles.actions.create') }}
           </el-button>
         </div>
@@ -192,6 +203,7 @@
 <script lang="ts" setup>
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import SingleUpload from '~/@core/components/SingleUpload.vue'
 
 definePageMeta({
   layout: 'admin',
@@ -214,7 +226,7 @@ type ApiUserProfile = {
   phoneNumber?: string
   address?: string
   note?: string
-  profile?: string
+  profile?: ProfileValue
 }
 
 type UserProfileForm = {
@@ -227,14 +239,34 @@ type UserProfileForm = {
   phoneNumber: string
   address: string
   note: string
-  profile: string
+  profile: ProfileValue
 }
 
 type UserProfilePayload = Omit<UserProfileForm, 'phoneNumber' | 'address' | 'profile'> & {
   phoneNumber?: string
   address?: string
-  profile?: string
+  profile?: MinioUploadObject
 }
+
+type MinioUploadObject = {
+  bucket?: string
+  objectName?: string
+  originalName?: string
+  mimeType?: string
+  size?: number
+  etag?: string
+  publicId?: string
+  public_id?: string
+  fileName?: string
+  filename?: string
+  url?: string
+  secureUrl?: string
+  secure_url?: string
+  path?: string
+  data?: ProfileValue
+}
+
+type ProfileValue = string | MinioUploadObject | null
 
 type PaginatedResponse = {
   data?: ApiUserProfile[] | { userProfiles?: ApiUserProfile[]; profiles?: ApiUserProfile[]; items?: ApiUserProfile[]; docs?: ApiUserProfile[] }
@@ -266,6 +298,7 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const totalItems = ref(0)
 const userProfiles = ref<ApiUserProfile[]>([])
+const profileUrlCache = ref<Record<string, string>>({})
 const isLoading = ref(false)
 const isSaving = ref(false)
 const isDialogVisible = ref(false)
@@ -282,7 +315,7 @@ const form = reactive<UserProfileForm>({
   phoneNumber: '',
   address: '',
   note: '',
-  profile: ''
+  profile: null
 })
 
 const isEditing = computed(() => Boolean(editingUserProfileId.value))
@@ -327,6 +360,7 @@ const rules: FormRules<UserProfileForm> = {
 const requestHeaders = computed(() => ({
   ...(authToken.value ? { Authorization: `Bearer ${authToken.value}` } : {})
 }))
+const minioBucketPathPattern = /\/order-management\/(.+?)(?:\?.*)?$/
 
 const getUserProfileId = (userProfile: ApiUserProfile) => userProfile._id || userProfile.id || ''
 
@@ -376,9 +410,119 @@ const buildQuery = () => ({
   ...(search.value.trim() ? { search: search.value.trim() } : {})
 })
 
-const getProfileUrl = (profile: string) => {
-  if (/^https?:\/\//.test(profile)) return profile
+const normalizeProfileValue = (value?: ProfileValue): ProfileValue | '' => {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  if (value.data) return normalizeProfileValue(value.data)
+
+  return value
+}
+
+const getProfileObjectName = (profile?: ProfileValue) => {
+  if (!profile) return ''
+
+  if (typeof profile !== 'string') {
+    if (profile.data) return getProfileObjectName(profile.data)
+
+    return profile.objectName
+      || profile.publicId
+      || profile.public_id
+      || profile.fileName
+      || profile.filename
+      || (profile.url?.match(minioBucketPathPattern)?.[1]
+        ? decodeURIComponent(profile.url.match(minioBucketPathPattern)?.[1] || '')
+        : '')
+  }
+
+  if (profile.startsWith('uploads/')) return ''
+
+  const objectNameFromUrl = profile.match(minioBucketPathPattern)?.[1]
+  if (objectNameFromUrl) return decodeURIComponent(objectNameFromUrl)
+  if (/^https?:\/\//.test(profile)) return ''
+
+  return profile
+}
+
+const normalizeProfileForPayload = (value?: ProfileValue): MinioUploadObject | null => {
+  const profile = normalizeProfileValue(value)
+  if (!profile || typeof profile === 'string') return null
+
+  const objectName = getProfileObjectName(profile)
+  if (!objectName) return null
+
+  return {
+    ...profile,
+    objectName
+  }
+}
+
+const profileUploadValue = computed<ProfileValue>({
+  get: () => form.profile || null,
+  set: (value) => {
+    form.profile = normalizeProfileValue(value) || null
+  }
+})
+
+const getDirectProfileUrl = (profile?: ProfileValue) => {
+  if (!profile) return ''
+
+  if (typeof profile !== 'string') {
+    if (getProfileObjectName(profile)) return ''
+
+    return profile.secureUrl || profile.secure_url || profile.url || profile.path || ''
+  }
+
+  if (/^https?:\/\//.test(profile) && !getProfileObjectName(profile)) return profile
+  if (!profile.startsWith('uploads/')) return ''
+
   return `${apiBaseUrl.value.replace(/\/api\/v\d+$/, '')}/${profile.replace(/^\//, '')}`
+}
+
+const getProfileCacheKey = (profile?: ProfileValue) => {
+  if (!profile) return ''
+
+  return getProfileObjectName(profile) || getDirectProfileUrl(profile)
+}
+
+const getUserProfileUrl = (profile?: ProfileValue) => {
+  if (!profile) return ''
+
+  const cacheKey = getProfileCacheKey(profile)
+
+  return (cacheKey ? profileUrlCache.value[cacheKey] : '') || getDirectProfileUrl(profile)
+}
+
+const loadProfileUrl = async (profile?: ProfileValue) => {
+  const objectName = getProfileObjectName(profile)
+  if (!profile || !objectName || profileUrlCache.value[objectName]) return
+
+  try {
+    const response = await $fetch<{ data?: { url?: string }; url?: string }>('minio/presigned-get', {
+      baseURL: `${apiBaseUrl.value}/`,
+      method: 'post',
+      headers: requestHeaders.value,
+      body: {
+        objectName,
+        expiresInSeconds: 3600
+      }
+    })
+
+    const url = response.data?.url || response.url
+    if (url) {
+      profileUrlCache.value = {
+        ...profileUrlCache.value,
+        [objectName]: url
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const loadUserProfileUrls = (items: ApiUserProfile[]) => {
+  items.forEach((item) => {
+    loadProfileUrl(item.profile)
+  })
 }
 
 const formatDate = (value?: string) => {
@@ -398,6 +542,7 @@ const refreshUserProfiles = async () => {
 
     const items = extractUserProfiles(response)
     userProfiles.value = items
+    loadUserProfileUrls(items)
     totalItems.value = getTotalItems(response, items)
   } catch (error) {
     ElMessage.error(getErrorMessage(error))
@@ -418,7 +563,7 @@ const resetForm = () => {
     phoneNumber: '',
     address: '',
     note: '',
-    profile: ''
+    profile: null
   })
   userProfileFormRef.value?.clearValidate()
 }
@@ -444,7 +589,7 @@ const openEditDialog = (userProfile: ApiUserProfile) => {
     phoneNumber: userProfile.phoneNumber || '',
     address: userProfile.address || '',
     note: userProfile.note || '',
-    profile: userProfile.profile || ''
+    profile: normalizeProfileValue(userProfile.profile) || null
   })
   isDialogVisible.value = true
 }
@@ -462,7 +607,7 @@ const buildPayload = (): UserProfilePayload => {
 
   const phoneNumber = form.phoneNumber.trim()
   const address = form.address.trim()
-  const profile = form.profile.trim()
+  const profile = normalizeProfileForPayload(form.profile)
 
   if (phoneNumber) payload.phoneNumber = phoneNumber
   if (address) payload.address = address
