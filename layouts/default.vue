@@ -101,6 +101,10 @@
                       <Icon name="lucide:pencil" class="mr-2 h-4 w-4" />
                       Edit profile
                     </el-dropdown-item>
+                    <el-dropdown-item command="my-orders">
+                      <Icon name="lucide:receipt-text" class="mr-2 h-4 w-4" />
+                      My Order
+                    </el-dropdown-item>
                     <el-dropdown-item command="change-password">
                       <Icon name="lucide:key-round" class="mr-2 h-4 w-4" />
                       Change password
@@ -221,6 +225,54 @@
         </div>
       </div>
     </el-drawer>
+
+    <el-dialog v-model="isOrderHistoryVisible" title="My Orders" width="min(960px, 94vw)" destroy-on-close>
+      <div v-loading="orderHistoryLoading" class="min-h-52">
+        <div v-if="orderHistory.length" class="space-y-3">
+          <article v-for="sale in orderHistory" :key="sale._id || sale.id" class="overflow-hidden rounded-lg border border-slate-200 bg-white">
+            <div class="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="font-bold text-slate-950">{{ sale.code }}</h3>
+                  <el-tag :type="getOrderStatusType(sale.status)" size="small">{{ formatOrderStatus(sale.status) }}</el-tag>
+                </div>
+                <p class="mt-1 text-xs text-slate-500">{{ formatOrderDate(sale.salingDate || sale.createdAt) }} · {{ sale.items?.length || 0 }} product{{ sale.items?.length === 1 ? '' : 's' }}</p>
+              </div>
+              <div class="flex items-center justify-between gap-4 sm:justify-end">
+                <div class="text-left sm:text-right">
+                  <p class="text-xs text-slate-500">Total</p>
+                  <p class="font-bold text-emerald-700">{{ formatCartPrice(getSaleHistoryTotal(sale)) }}</p>
+                </div>
+                <el-button text circle :aria-label="expandedOrderId === (sale._id || sale.id) ? 'Hide details' : 'Show details'" @click="toggleOrderDetails(sale)">
+                  <Icon :name="expandedOrderId === (sale._id || sale.id) ? 'lucide:chevron-up' : 'lucide:chevron-down'" class="h-5 w-5" />
+                </el-button>
+              </div>
+            </div>
+
+            <div v-if="expandedOrderId === (sale._id || sale.id)" class="border-t border-slate-200 bg-slate-50 p-4">
+              <dl class="mb-4 grid gap-3 text-sm sm:grid-cols-3">
+                <div><dt class="text-xs text-slate-500">Payment</dt><dd class="mt-1 font-medium text-slate-800">{{ getSalePaymentLabel(sale) }}</dd></div>
+                <div><dt class="text-xs text-slate-500">Delivery address</dt><dd class="mt-1 font-medium text-slate-800">{{ sale.address || '-' }}</dd></div>
+                <div><dt class="text-xs text-slate-500">Note</dt><dd class="mt-1 font-medium text-slate-800">{{ sale.note || '-' }}</dd></div>
+              </dl>
+              <div class="overflow-x-auto rounded-md border border-slate-200 bg-white">
+                <table class="w-full min-w-[560px] text-left text-sm">
+                  <thead class="bg-slate-100 text-xs uppercase text-slate-500"><tr><th class="px-3 py-2">Product</th><th class="px-3 py-2 text-right">Price</th><th class="px-3 py-2 text-right">Discount</th><th class="px-3 py-2 text-right">Qty</th><th class="px-3 py-2 text-right">Subtotal</th></tr></thead>
+                  <tbody><tr v-for="(item, index) in sale.items || []" :key="item._id || item.id || index" class="border-t border-slate-100"><td class="px-3 py-3"><p class="font-medium text-slate-900">{{ getSaleItemName(item) }}</p><p class="text-xs text-slate-500">{{ getSaleItemCode(item) }}</p></td><td class="px-3 py-3 text-right">{{ formatCartPrice(Number(item.unitPrice || 0)) }}</td><td class="px-3 py-3 text-right">{{ formatCartPrice(Number(item.discount || 0)) }}</td><td class="px-3 py-3 text-right">{{ item.quantity || 0 }}</td><td class="px-3 py-3 text-right font-semibold">{{ formatCartPrice(getSaleItemTotal(item)) }}</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </article>
+
+          <div class="flex justify-end pt-2">
+            <el-pagination v-model:current-page="orderHistoryPage" :page-size="orderHistoryLimit" :total="orderHistoryTotal" background layout="total, prev, pager, next" @current-change="fetchOrderHistory" />
+          </div>
+        </div>
+        <div v-else-if="!orderHistoryLoading" class="grid min-h-52 place-items-center rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+          <div><Icon name="lucide:receipt-text" class="mx-auto h-10 w-10 text-slate-300" /><h3 class="mt-3 font-semibold text-slate-950">No orders yet</h3><p class="mt-1 text-sm text-slate-500">Your completed checkouts will appear here.</p></div>
+        </div>
+      </div>
+    </el-dialog>
 
     <el-dialog v-model="isProfileViewVisible" title="Profile" width="680px" destroy-on-close>
       <div v-loading="profileLoading" class="min-h-40">
@@ -565,11 +617,41 @@ type ChangePasswordResponse = {
   message?: string
 }
 
+type SaleHistoryProduct = { _id?: string; id?: string; code?: string; nameEn?: string; nameKh?: string }
+type SaleHistoryItem = { _id?: string; id?: string; product?: string | SaleHistoryProduct; quantity?: number; unitPrice?: number; discount?: number; note?: string }
+type SaleHistory = {
+  _id?: string
+  id?: string
+  code?: string
+  customer?: string | { _id?: string; id?: string; username?: string; email?: string }
+  salingDate?: string
+  createdAt?: string
+  status?: string
+  paymentMethod?: string | { merchantName?: string; bankAccount?: string; storeLabel?: string }
+  address?: string
+  note?: string
+  items?: SaleHistoryItem[]
+}
+type SaleHistoryResponse = SaleHistory[] | {
+  data?: SaleHistory[] | { sales?: SaleHistory[]; items?: SaleHistory[]; docs?: SaleHistory[] }
+  sales?: SaleHistory[]
+  items?: SaleHistory[]
+  docs?: SaleHistory[]
+  pagination?: { total?: number; page?: number; limit?: number; totalPages?: number }
+}
+
 const minioBucketPathPattern = /\/order-management\/(.+?)(?:\?.*)?$/
 const isProfileViewVisible = ref(false)
 const isProfileEditVisible = ref(false)
 const isPasswordDialogVisible = ref(false)
 const isCartDrawerVisible = ref(false)
+const isOrderHistoryVisible = ref(false)
+const orderHistoryLoading = ref(false)
+const orderHistory = ref<SaleHistory[]>([])
+const orderHistoryPage = ref(1)
+const orderHistoryLimit = 10
+const orderHistoryTotal = ref(0)
+const expandedOrderId = ref('')
 const profileLoading = ref(false)
 const profileSaving = ref(false)
 const passwordSaving = ref(false)
@@ -727,6 +809,69 @@ const getCartProductPrice = (order?: PickedOrder) => {
 const getCartOrderTotal = (order?: PickedOrder) => getCartProductPrice(order) * Number(order?.quantity || 1)
 
 const cartTotal = computed(() => pickedProducts.value.reduce((total, order) => total + getCartOrderTotal(order), 0))
+
+const extractOrderHistory = (response: SaleHistoryResponse): SaleHistory[] => {
+  if (Array.isArray(response)) return response
+  if (Array.isArray(response.data)) return response.data
+  if (Array.isArray(response.data?.sales)) return response.data.sales
+  if (Array.isArray(response.data?.items)) return response.data.items
+  if (Array.isArray(response.data?.docs)) return response.data.docs
+  if (Array.isArray(response.sales)) return response.sales
+  if (Array.isArray(response.items)) return response.items
+  if (Array.isArray(response.docs)) return response.docs
+  return []
+}
+
+const getSaleCustomerId = (sale: SaleHistory) => typeof sale.customer === 'string' ? sale.customer : sale.customer?._id || sale.customer?.id || ''
+const getSaleItemProduct = (item: SaleHistoryItem) => typeof item.product === 'object' && item.product !== null ? item.product : null
+const getSaleItemName = (item: SaleHistoryItem) => getSaleItemProduct(item)?.nameEn || getSaleItemProduct(item)?.nameKh || 'Product'
+const getSaleItemCode = (item: SaleHistoryItem) => getSaleItemProduct(item)?.code || (typeof item.product === 'string' ? item.product : '-')
+const getSaleItemTotal = (item: SaleHistoryItem) => Math.max(Number(item.unitPrice || 0) - Number(item.discount || 0), 0) * Number(item.quantity || 0)
+const getSaleHistoryTotal = (sale: SaleHistory) => (sale.items || []).reduce((total, item) => total + getSaleItemTotal(item), 0)
+const getSalePaymentLabel = (sale: SaleHistory) => {
+  if (typeof sale.paymentMethod === 'string') return sale.paymentMethod
+  return [sale.paymentMethod?.merchantName || sale.paymentMethod?.storeLabel, sale.paymentMethod?.bankAccount].filter(Boolean).join(' — ') || '-'
+}
+const formatOrderDate = (value?: string) => value ? new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '-'
+const formatOrderStatus = (status?: string) => status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Pending'
+const getOrderStatusType = (status?: string) => {
+  if (status === 'completed' || status === 'delivered') return 'success'
+  if (status === 'shipping' || status === 'packing') return 'warning'
+  return 'info'
+}
+const toggleOrderDetails = (sale: SaleHistory) => {
+  const id = sale._id || sale.id || ''
+  expandedOrderId.value = expandedOrderId.value === id ? '' : id
+}
+
+const fetchOrderHistory = async () => {
+  const customerId = getCurrentUserId()
+  if (!customerId) return
+  orderHistoryLoading.value = true
+  try {
+    const response = await $fetch<SaleHistoryResponse>(`${apiBaseUrl.value}/saling/sales`, {
+      headers: requestHeaders.value,
+      query: { page: orderHistoryPage.value, limit: orderHistoryLimit, customer: customerId }
+    })
+    const records = extractOrderHistory(response)
+    // Keep the UI customer-scoped even if an older backend ignores the customer query.
+    orderHistory.value = records.filter((sale) => !getSaleCustomerId(sale) || getSaleCustomerId(sale) === customerId)
+    orderHistoryTotal.value = Array.isArray(response) ? orderHistory.value.length : response.pagination?.total ?? orderHistory.value.length
+  } catch (error) {
+    orderHistory.value = []
+    orderHistoryTotal.value = 0
+    ElMessage.error(getErrorMessage(error, 'Failed to load your orders.'))
+  } finally {
+    orderHistoryLoading.value = false
+  }
+}
+
+const openOrderHistory = async () => {
+  orderHistoryPage.value = 1
+  expandedOrderId.value = ''
+  isOrderHistoryVisible.value = true
+  await fetchOrderHistory()
+}
 
 const formatCartPrice = (value = 0) => {
   return new Intl.NumberFormat('en-US', {
@@ -1115,6 +1260,11 @@ const handleAccountCommand = async (command: string | number | object) => {
 
   if (command === 'edit-profile') {
     await openProfileEdit()
+    return
+  }
+
+  if (command === 'my-orders') {
+    await openOrderHistory()
     return
   }
 

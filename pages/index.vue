@@ -200,6 +200,60 @@
       </p>
     </section>
 
+    <section v-if="pickedProducts.length" class="fixed bottom-5 left-1/2 z-30 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 sm:left-auto sm:right-6 sm:w-auto sm:translate-x-0">
+      <div class="flex items-center justify-between gap-5 rounded-xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/10 sm:min-w-[380px]">
+        <div class="min-w-0">
+          <p class="text-xs font-medium text-slate-500">{{ pickedProductsCount }} item{{ pickedProductsCount === 1 ? '' : 's' }} in cart</p>
+          <p class="truncate text-lg font-bold text-slate-950">{{ formatPrice(checkoutTotal) }}</p>
+        </div>
+        <button class="inline-flex h-11 shrink-0 items-center gap-2 rounded-lg bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800" type="button" @click="openCheckout">
+          <Icon name="lucide:credit-card" class="h-4 w-4" />
+          Place order
+        </button>
+      </div>
+    </section>
+
+    <el-dialog v-model="isCheckoutVisible" title="Complete your order" width="680px" destroy-on-close>
+      <el-form ref="checkoutFormRef" :model="checkoutForm" :rules="checkoutRules" label-position="top" @submit.prevent="submitOrder">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <el-form-item label="Order code" prop="code">
+            <el-input v-model="checkoutForm.code" />
+          </el-form-item>
+          <el-form-item label="Payment method" prop="paymentMethod">
+            <el-select v-model="checkoutForm.paymentMethod" class="w-full" filterable :loading="paymentMethodsLoading" placeholder="Select payment method">
+              <el-option v-for="method in paymentMethods" :key="getPaymentMethodId(method)" :label="getPaymentMethodLabel(method)" :value="getPaymentMethodId(method)" />
+            </el-select>
+          </el-form-item>
+        </div>
+        <el-form-item label="Delivery address" prop="address">
+          <el-input v-model="checkoutForm.address" placeholder="Enter the delivery address" />
+        </el-form-item>
+        <el-form-item label="Order note" prop="note">
+          <el-input v-model="checkoutForm.note" type="textarea" :rows="3" placeholder="Optional instructions" />
+        </el-form-item>
+
+        <div class="rounded-lg border border-slate-200">
+          <div v-for="order in pickedProducts" :key="getPickedOrderId(order)" class="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 last:border-b-0">
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold text-slate-900">{{ getCheckoutProductName(order) }}</p>
+              <p class="text-xs text-slate-500">{{ order.quantity || 1 }} × {{ formatPrice(getCheckoutUnitPrice(order)) }}</p>
+            </div>
+            <p class="shrink-0 text-sm font-bold text-slate-900">{{ formatPrice(getCheckoutLineTotal(order)) }}</p>
+          </div>
+          <div class="flex items-center justify-between bg-slate-50 px-4 py-3">
+            <span class="text-sm font-semibold text-slate-700">Total</span>
+            <span class="text-lg font-bold text-emerald-700">{{ formatPrice(checkoutTotal) }}</span>
+          </div>
+        </div>
+      </el-form>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <el-button @click="isCheckoutVisible = false">Cancel</el-button>
+          <el-button type="primary" :loading="isSubmittingOrder" @click="submitOrder">Confirm order</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <el-dialog v-model="isDetailDialogVisible" width="860px" destroy-on-close class="product-detail-dialog">
       <template #header>
         <div>
@@ -259,6 +313,8 @@
 
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
+import type { PickedOrder, PickedProduct } from '~/composables/usePickedProducts'
 
 definePageMeta({
   title: 'តោះចាយលុយ!'
@@ -357,12 +413,23 @@ type DetailResponse<T> = {
 const config = useRuntimeConfig()
 const route = useRoute()
 const authToken = useCookie<string | null>('auth_token')
-const { pickProduct, fetchPickedProducts } = usePickedProducts()
+const { user, isAuthenticated } = useAuth()
+const {
+  pickedProducts,
+  pickedProductsCount,
+  pickProduct,
+  fetchPickedProducts,
+  removePickedProduct,
+  getPickedProductId,
+  getPickedOrderId
+} = usePickedProducts()
 
 const apiBaseUrl = computed(() => String(config.public.apiBaseUrl).replace(/\/$/, ''))
 const categoriesEndpoint = computed(() => `${apiBaseUrl.value}/master-data/categories/select-options`)
 const bannersEndpoint = computed(() => `${apiBaseUrl.value}/saling/banners/select-options`)
 const productsEndpoint = computed(() => `${apiBaseUrl.value}/master-data/products`)
+const salesEndpoint = computed(() => `${apiBaseUrl.value}/saling/sales`)
+const paymentMethodsEndpoint = computed(() => `${apiBaseUrl.value}/system/payment-methods`)
 const requestHeaders = computed(() => ({
   ...(authToken.value ? { Authorization: `Bearer ${authToken.value}` } : {})
 }))
@@ -385,6 +452,20 @@ const productLimit = 10
 const totalProducts = ref(0)
 const loadMoreTarget = ref<HTMLElement | null>(null)
 const pickingProductIds = ref<string[]>([])
+type PaymentMethod = { _id?: string; id?: string; merchantName?: string; bankAccount?: string; isActive?: boolean }
+type PaymentMethodsResponse = PaymentMethod[] | { data?: PaymentMethod[] | { paymentMethods?: PaymentMethod[]; items?: PaymentMethod[]; docs?: PaymentMethod[] }; paymentMethods?: PaymentMethod[]; items?: PaymentMethod[]; docs?: PaymentMethod[] }
+
+const isCheckoutVisible = ref(false)
+const isSubmittingOrder = ref(false)
+const paymentMethodsLoading = ref(false)
+const paymentMethods = ref<PaymentMethod[]>([])
+const checkoutFormRef = ref<FormInstance>()
+const checkoutForm = reactive({ code: '', paymentMethod: '', address: '', note: '' })
+const checkoutRules: FormRules = {
+  code: [{ required: true, message: 'Order code is required', trigger: 'blur' }],
+  paymentMethod: [{ required: true, message: 'Select a payment method', trigger: 'change' }],
+  address: [{ required: true, message: 'Delivery address is required', trigger: 'blur' }]
+}
 
 let carouselTimer: ReturnType<typeof setInterval> | undefined
 let searchTimer: ReturnType<typeof setTimeout> | undefined
@@ -757,6 +838,136 @@ const handlePickProduct = async (product?: ApiProduct | null) => {
     ElMessage.error(getErrorMessage(error, 'Failed to pick product.'))
   } finally {
     pickingProductIds.value = pickingProductIds.value.filter((id) => id !== productId)
+  }
+}
+
+const getCheckoutProduct = (order: PickedOrder): PickedProduct | null => {
+  return typeof order.product === 'object' && order.product !== null ? order.product : null
+}
+
+const getCheckoutProductName = (order: PickedOrder) => {
+  const product = getCheckoutProduct(order)
+  return product?.nameEn || product?.nameKh || product?.code || getPickedProductId(order.product) || 'Product'
+}
+
+const getCheckoutUnitPrice = (order: PickedOrder) => {
+  const product = getCheckoutProduct(order)
+  return Math.max(Number(product?.unitPrice || 0) - Number(product?.discount || 0), 0)
+}
+
+const getCheckoutLineTotal = (order: PickedOrder) => {
+  return getCheckoutUnitPrice(order) * Math.max(Number(order.quantity || 1), 1)
+}
+
+const checkoutTotal = computed(() => pickedProducts.value.reduce((total, order) => total + getCheckoutLineTotal(order), 0))
+
+const getPaymentMethodId = (method: PaymentMethod) => method._id || method.id || ''
+const getPaymentMethodLabel = (method: PaymentMethod) => {
+  return [method.merchantName, method.bankAccount].filter(Boolean).join(' — ') || 'Payment method'
+}
+
+const extractPaymentMethods = (response: PaymentMethodsResponse): PaymentMethod[] => {
+  if (Array.isArray(response)) return response
+  if (Array.isArray(response.data)) return response.data
+  if (Array.isArray(response.data?.paymentMethods)) return response.data.paymentMethods
+  if (Array.isArray(response.data?.items)) return response.data.items
+  if (Array.isArray(response.data?.docs)) return response.data.docs
+  if (Array.isArray(response.paymentMethods)) return response.paymentMethods
+  if (Array.isArray(response.items)) return response.items
+  if (Array.isArray(response.docs)) return response.docs
+  return []
+}
+
+const loadPaymentMethods = async () => {
+  if (paymentMethods.value.length || paymentMethodsLoading.value) return
+  paymentMethodsLoading.value = true
+  try {
+    const response = await $fetch<PaymentMethodsResponse>(paymentMethodsEndpoint.value, {
+      headers: requestHeaders.value,
+      query: { page: 1, limit: 100, isActive: true }
+    })
+    paymentMethods.value = extractPaymentMethods(response).filter((method) => method.isActive !== false && getPaymentMethodId(method))
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error, 'Failed to load payment methods.'))
+  } finally {
+    paymentMethodsLoading.value = false
+  }
+}
+
+const createSaleCode = () => {
+  const now = new Date()
+  const date = [now.getFullYear(), now.getMonth() + 1, now.getDate()].map((part, index) => index ? String(part).padStart(2, '0') : part).join('')
+  return `SALE-${date}-${String(now.getTime()).slice(-6)}`
+}
+
+const openCheckout = async () => {
+  if (!isAuthenticated.value) {
+    await navigateTo('/auth/login')
+    return
+  }
+  if (!pickedProducts.value.length) return
+
+  checkoutForm.code = createSaleCode()
+  checkoutForm.address = user.value?.userProfile?.address || checkoutForm.address
+  isCheckoutVisible.value = true
+  await loadPaymentMethods()
+}
+
+const submitOrder = async () => {
+  if (isSubmittingOrder.value || !pickedProducts.value.length) return
+  const isValid = await checkoutFormRef.value?.validate().catch(() => false)
+  if (!isValid) return
+
+  const customerId = user.value?._id || user.value?.id
+  if (!customerId) {
+    ElMessage.error('Your customer account could not be identified. Please sign in again.')
+    return
+  }
+
+  const items = pickedProducts.value.map((order) => {
+    const product = getCheckoutProduct(order)
+    return {
+      product: getPickedProductId(order.product),
+      quantity: Math.max(Number(order.quantity || 1), 1),
+      unitPrice: Number(product?.unitPrice || 0),
+      discount: Number(product?.discount || 0),
+      note: ''
+    }
+  })
+
+  if (items.some((item) => !item.product)) {
+    ElMessage.error('One or more cart products are invalid. Please refresh your cart.')
+    return
+  }
+
+  isSubmittingOrder.value = true
+  try {
+    await $fetch(salesEndpoint.value, {
+      method: 'POST',
+      headers: requestHeaders.value,
+      body: {
+        code: checkoutForm.code.trim(),
+        customer: customerId,
+        salingDate: new Date().toISOString(),
+        status: 'pending',
+        paymentMethod: checkoutForm.paymentMethod,
+        address: checkoutForm.address.trim(),
+        note: checkoutForm.note.trim(),
+        items
+      }
+    })
+
+    const ordersToRemove = [...pickedProducts.value]
+    await Promise.allSettled(ordersToRemove.map((order) => removePickedProduct(order)))
+    await fetchPickedProducts()
+    isCheckoutVisible.value = false
+    checkoutForm.paymentMethod = ''
+    checkoutForm.note = ''
+    ElMessage.success('Your order was placed successfully.')
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error, 'Failed to place your order.'))
+  } finally {
+    isSubmittingOrder.value = false
   }
 }
 
