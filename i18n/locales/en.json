@@ -45,14 +45,21 @@
     }
   },
   "dashboard": {
-    "totalOrders": "Total orders",
-    "totalOrdersCaption": "Orders recorded this month",
-    "activeUsers": "Active users",
-    "activeUsersCaption": "Users with recent activity",
-    "revenue": "Revenue",
-    "revenueCaption": "Confirmed sales this month",
-    "pendingTasks": "Pending tasks",
-    "pendingTasksCaption": "Items waiting for action",
+    "overview": "Business overview",
+    "title": "Dashboard {year}",
+    "description": "Track sales performance, customers, and inventory at a glance.",
+    "selectYear": "Select year",
+    "totalIncome": "Total income",
+    "totalPendingItem": "Pending items",
+    "totalCustomer": "Customers",
+    "totalUser": "System users",
+    "totalCategory": "Categories",
+    "totalProduct": "Products",
+    "salesReport": "Sales report",
+    "salesReportHelp": "Monthly income and order volume for {year}",
+    "income": "Income",
+    "orders": "Orders",
+    "items": "Items",
     "recentOrders": "Recent orders",
     "recentOrdersHelp": "Latest order activity across the system"
   },
@@ -63,7 +70,10 @@
     "status": {
       "completed": "Completed",
       "pending": "Pending",
-      "processing": "Processing"
+      "processing": "Processing",
+      "shipping": "Shipping",
+      "cancelled": "Cancelled",
+      "unknown": "Unknown"
     }
   },
   "users": {

@@ -3,7 +3,7 @@
     <el-container class="min-h-screen">
       <el-aside
         :width="isCollapsed ? '76px' : '248px'"
-        class="admin-sidebar hidden border-r border-slate-200 bg-white transition-all duration-200 lg:block"
+        class="admin-sidebar sticky top-0 hidden h-screen shrink-0 self-start overflow-hidden border-r border-slate-200 bg-white transition-all duration-200 lg:flex lg:flex-col"
       >
         <div class="flex h-16 items-center gap-3 border-b border-slate-200 px-4">
           <div class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-emerald-600 text-sm font-bold text-white">
@@ -30,7 +30,7 @@
         </el-menu>
       </el-aside>
 
-      <el-container>
+      <el-container class="min-w-0">
         <el-header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 lg:px-6">
           <div class="flex items-center gap-3">
             <el-button circle text @click="toggleSidebar">
@@ -207,6 +207,10 @@ const logout = async () => {
 
 :deep(.admin-menu) {
   --el-menu-item-height: 48px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 12px;
 }
 

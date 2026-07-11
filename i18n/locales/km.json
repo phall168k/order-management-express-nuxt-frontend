@@ -45,14 +45,21 @@
     }
   },
   "dashboard": {
-    "totalOrders": "ការបញ្ជាទិញសរុប",
-    "totalOrdersCaption": "ការបញ្ជាទិញក្នុងខែនេះ",
-    "activeUsers": "អ្នកប្រើសកម្ម",
-    "activeUsersCaption": "អ្នកប្រើដែលមានសកម្មភាពថ្មីៗ",
-    "revenue": "ចំណូល",
-    "revenueCaption": "ការលក់ដែលបានបញ្ជាក់ក្នុងខែនេះ",
-    "pendingTasks": "ការងាររង់ចាំ",
-    "pendingTasksCaption": "ធាតុដែលរង់ចាំដំណើរការ",
+    "overview": "ទិដ្ឋភាពទូទៅនៃអាជីវកម្ម",
+    "title": "ផ្ទាំងសង្ខេបឆ្នាំ {year}",
+    "description": "តាមដានការលក់ អតិថិជន និងស្តុកទំនិញបានយ៉ាងងាយស្រួល។",
+    "selectYear": "ជ្រើសរើសឆ្នាំ",
+    "totalIncome": "ចំណូលសរុប",
+    "totalPendingItem": "ទំនិញកំពុងរង់ចាំ",
+    "totalCustomer": "អតិថិជន",
+    "totalUser": "អ្នកប្រើប្រព័ន្ធ",
+    "totalCategory": "ប្រភេទទំនិញ",
+    "totalProduct": "ទំនិញ",
+    "salesReport": "របាយការណ៍លក់",
+    "salesReportHelp": "ចំណូល និងចំនួនការបញ្ជាទិញប្រចាំខែសម្រាប់ឆ្នាំ {year}",
+    "income": "ចំណូល",
+    "orders": "ការបញ្ជាទិញ",
+    "items": "ចំនួន",
     "recentOrders": "ការបញ្ជាទិញថ្មីៗ",
     "recentOrdersHelp": "សកម្មភាពបញ្ជាទិញចុងក្រោយក្នុងប្រព័ន្ធ"
   },
@@ -63,7 +70,10 @@
     "status": {
       "completed": "បានបញ្ចប់",
       "pending": "រង់ចាំ",
-      "processing": "កំពុងដំណើរការ"
+      "processing": "កំពុងដំណើរការ",
+      "shipping": "កំពុងដឹកជញ្ជូន",
+      "cancelled": "បានបោះបង់",
+      "unknown": "មិនស្គាល់"
     }
   },
   "users": {
