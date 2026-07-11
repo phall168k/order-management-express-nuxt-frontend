@@ -4,6 +4,18 @@
     "admin": "Admin Console",
     "subtitle": "Operations workspace"
   },
+  "account": {
+    "menu": "Account menu",
+    "profile": "User profiles",
+    "storefront": "View storefront",
+    "logout": "Log out",
+    "administrator": "Administrator",
+    "language": "Change language",
+    "languages": {
+      "english": "English",
+      "khmer": "Khmer"
+    }
+  },
   "menu": {
     "dashboard": "Dashboard",
     "categories": "Categories",

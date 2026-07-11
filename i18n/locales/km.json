@@ -4,6 +4,18 @@
     "admin": "ផ្ទាំងគ្រប់គ្រង",
     "subtitle": "កន្លែងធ្វើការប្រតិបត្តិការ"
   },
+  "account": {
+    "menu": "ម៉ឺនុយគណនី",
+    "profile": "ប្រវត្តិរូបអ្នកប្រើ",
+    "storefront": "មើលហាង",
+    "logout": "ចាកចេញ",
+    "administrator": "អ្នកគ្រប់គ្រង",
+    "language": "ប្តូរភាសា",
+    "languages": {
+      "english": "អង់គ្លេស",
+      "khmer": "ខ្មែរ"
+    }
+  },
   "menu": {
     "dashboard": "ផ្ទាំងសង្ខេប",
     "categories": "ប្រភេទទំនិញ",

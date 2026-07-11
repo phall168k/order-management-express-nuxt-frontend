@@ -42,21 +42,62 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
-            <el-select v-model="selectedLocale" class="w-32" size="small" @change="changeLocale">
-              <el-option
-                v-for="localeItem in locales"
+          <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1" :aria-label="t('account.language')">
+              <button
+                v-for="localeItem in languageOptions"
                 :key="localeItem.code"
-                :label="localeItem.name || localeItem.code"
-                :value="localeItem.code"
-              />
-            </el-select>
-            <el-avatar :size="34" :src="userProfileImageUrl" class="bg-emerald-600">{{ userInitial }}</el-avatar>
-            <el-tooltip content="Logout" placement="bottom">
-              <el-button circle text type="danger" @click="logout">
-                <Icon name="lucide:log-out" class="h-5 w-5" />
-              </el-button>
-            </el-tooltip>
+                class="grid h-8 w-8 place-items-center rounded-md transition"
+                :class="locale === localeItem.code
+                  ? 'bg-white shadow-sm ring-1 ring-slate-200'
+                  : 'opacity-60 hover:bg-white hover:opacity-100'"
+                type="button"
+                :title="t(localeItem.label)"
+                :aria-label="t(localeItem.label)"
+                :aria-pressed="locale === localeItem.code"
+                @click="changeLocale(localeItem.code)"
+              >
+                <Icon :name="localeItem.icon" class="h-5 w-5" />
+              </button>
+            </div>
+
+            <el-dropdown trigger="click" placement="bottom-end" @command="handleAccountCommand">
+              <button
+                class="flex min-w-0 items-center gap-2 rounded-lg border border-transparent p-1.5 text-left transition hover:border-slate-200 hover:bg-slate-50 sm:pr-2"
+                type="button"
+                :aria-label="t('account.menu')"
+              >
+                <el-avatar :size="36" :src="userProfileImageUrl" class="shrink-0 bg-emerald-600">
+                  {{ userInitial }}
+                </el-avatar>
+                <span class="hidden min-w-0 sm:block">
+                  <span class="block max-w-36 truncate text-sm font-semibold text-slate-800">{{ userDisplayName }}</span>
+                  <span class="block max-w-36 truncate text-xs text-slate-500">{{ userSubtitle }}</span>
+                </span>
+                <Icon name="lucide:chevron-down" class="hidden h-4 w-4 shrink-0 text-slate-400 sm:block" />
+              </button>
+
+              <template #dropdown>
+                <el-dropdown-menu class="admin-account-menu">
+                  <div class="min-w-60 border-b border-slate-100 px-4 py-3">
+                    <p class="truncate text-sm font-semibold text-slate-900">{{ userDisplayName }}</p>
+                    <p class="mt-0.5 truncate text-xs text-slate-500">{{ user?.email || t('account.administrator') }}</p>
+                  </div>
+                  <el-dropdown-item v-if="canManageProfiles" command="profile">
+                    <Icon name="lucide:user-round" class="mr-2 h-4 w-4" />
+                    {{ t('account.profile') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item command="storefront">
+                    <Icon name="lucide:store" class="mr-2 h-4 w-4" />
+                    {{ t('account.storefront') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item divided command="logout">
+                    <Icon name="lucide:log-out" class="mr-2 h-4 w-4 text-rose-500" />
+                    <span class="text-rose-600">{{ t('account.logout') }}</span>
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </el-header>
 
@@ -70,13 +111,17 @@
 
 <script setup lang="ts">
 const route = useRoute()
-const { t, locale, locales, setLocale } = useI18n()
+const { t, locale, setLocale } = useI18n()
 const { user, hasAnyPermission, clearAuth } = useAuth()
 
 const isCollapsed = ref(false)
-const selectedLocale = ref(locale.value)
 const userProfileImageSource = computed(() => user.value?.userProfile?.profile)
 const { imageUrl: userProfileImageUrl } = useProfileImageUrl(userProfileImageSource)
+
+const languageOptions = [
+  { code: 'km' as const, label: 'account.languages.khmer', icon: 'emojione:flag-for-cambodia' },
+  { code: 'en' as const, label: 'account.languages.english', icon: 'circle-flags:us' }
+]
 
 const menuItems = [
   { path: '/admin/dashboard', label: 'menu.dashboard', icon: 'lucide:layout-dashboard' },
@@ -97,6 +142,8 @@ const visibleMenuItems = computed(() => {
   return menuItems.filter((item) => hasAnyPermission(item.permission))
 })
 
+const canManageProfiles = computed(() => hasAnyPermission('user-profile.read'))
+
 const currentTitle = computed(() => {
   const activeItem = [...menuItems]
     .sort((a, b) => b.path.length - a.path.length)
@@ -113,16 +160,38 @@ const userInitial = computed(() => {
   return (profileName || user.value?.username || user.value?.email || 'A').charAt(0).toUpperCase()
 })
 
-watch(locale, (value) => {
-  selectedLocale.value = value
+const userDisplayName = computed(() => {
+  const profileName = [
+    user.value?.userProfile?.firstName,
+    user.value?.userProfile?.lastName
+  ].filter(Boolean).join(' ')
+
+  return profileName || user.value?.username || t('account.administrator')
 })
+
+const userSubtitle = computed(() => user.value?.email || t('account.administrator'))
 
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
 
-const changeLocale = (value: string) => {
+const changeLocale = (value: 'en' | 'km') => {
+  if (locale.value === value) return
   setLocale(value)
+}
+
+const handleAccountCommand = async (command: string | number | object) => {
+  if (command === 'profile') {
+    await navigateTo('/admin/system/user-profile')
+    return
+  }
+
+  if (command === 'storefront') {
+    await navigateTo('/')
+    return
+  }
+
+  if (command === 'logout') await logout()
 }
 
 const logout = async () => {
