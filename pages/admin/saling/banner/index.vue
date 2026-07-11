@@ -25,10 +25,10 @@
           <template #default="{ row }">
             <div class="grid h-16 w-28 place-items-center overflow-hidden rounded border border-slate-200 bg-slate-50">
               <img
-                v-if="row.thumbnail"
+                v-if="getBannerThumbnailUrl(row.thumbnail)"
                 :alt="row.title"
                 class="h-full w-full object-cover"
-                :src="getThumbnailUrl(row.thumbnail)"
+                :src="getBannerThumbnailUrl(row.thumbnail)"
               >
               <Icon v-else name="lucide:image" class="h-5 w-5 text-slate-400" />
             </div>
@@ -113,7 +113,7 @@
             <el-input v-model="form.title" :placeholder="t('banners.placeholders.title')" />
           </el-form-item>
           <el-form-item :label="t('banners.thumbnail')" prop="thumbnail">
-            <el-input v-model="form.thumbnail" :placeholder="t('banners.placeholders.thumbnail')" />
+            <SingleUpload v-model="form.thumbnail" class="w-full" />
           </el-form-item>
 
         <el-form-item :label="t('common.description')" prop="description">
@@ -145,6 +145,7 @@
 <script lang="ts" setup>
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import SingleUpload from '~/@core/components/SingleUpload.vue'
 
 definePageMeta({
   layout: 'admin',
@@ -158,7 +159,7 @@ type ApiBanner = {
   title: string
   product?: string | ProductOption
   description?: string
-  thumbnail?: string
+  thumbnail?: BannerThumbnail
   isActive?: boolean
 }
 
@@ -166,12 +167,33 @@ type BannerForm = {
   title: string
   product: string
   description: string
-  thumbnail: string
+  thumbnail: BannerThumbnail
   isActive: boolean
 }
 
-type BannerPayload = Omit<BannerForm, 'description'> & {
+type MinioUploadObject = {
+  bucket?: string
+  objectName?: string
+  originalName?: string
+  mimeType?: string
+  size?: number
+  etag?: string
+  publicId?: string
+  public_id?: string
+  fileName?: string
+  filename?: string
+  url?: string
+  secureUrl?: string
+  secure_url?: string
+  path?: string
+  data?: BannerThumbnail
+}
+
+type BannerThumbnail = string | MinioUploadObject | null
+
+type BannerPayload = Omit<BannerForm, 'description' | 'thumbnail'> & {
   description?: string
+  thumbnail: string
 }
 
 type ProductOption = {
@@ -234,12 +256,13 @@ const isSaving = ref(false)
 const isDialogVisible = ref(false)
 const editingBannerId = ref<string | null>(null)
 const bannerFormRef = ref<FormInstance>()
+const thumbnailUrlCache = ref<Record<string, string>>({})
 
 const form = reactive<BannerForm>({
   title: '',
   product: '',
   description: '',
-  thumbnail: '',
+  thumbnail: null,
   isActive: true
 })
 
@@ -247,6 +270,7 @@ const isEditing = computed(() => Boolean(editingBannerId.value))
 const canCreateBanner = computed(() => hasPermission('banner.create'))
 const canUpdateBanner = computed(() => hasPermission('banner.update'))
 const canDeleteBanner = computed(() => hasPermission('banner.delete'))
+const minioBucketPathPattern = /\/order-management\/(.+?)(?:\?.*)?$/
 
 const rules: FormRules<BannerForm> = {
   title: [
@@ -340,9 +364,89 @@ const buildQuery = () => ({
   ...(search.value.trim() ? { search: search.value.trim() } : {})
 })
 
-const getThumbnailUrl = (thumbnail: string) => {
+const normalizeThumbnailValue = (value?: BannerThumbnail): BannerThumbnail | '' => {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  if (value.data) return normalizeThumbnailValue(value.data)
+
+  return value
+}
+
+const getThumbnailObjectName = (thumbnail?: BannerThumbnail) => {
+  if (!thumbnail) return ''
+
+  if (typeof thumbnail !== 'string') {
+    if (thumbnail.data) return getThumbnailObjectName(thumbnail.data)
+
+    return thumbnail.objectName
+      || thumbnail.publicId
+      || thumbnail.public_id
+      || thumbnail.fileName
+      || thumbnail.filename
+      || (thumbnail.url?.match(minioBucketPathPattern)?.[1]
+        ? decodeURIComponent(thumbnail.url.match(minioBucketPathPattern)?.[1] || '')
+        : '')
+  }
+
+  if (thumbnail.startsWith('uploads/')) return ''
+
+  const objectNameFromUrl = thumbnail.match(minioBucketPathPattern)?.[1]
+  if (objectNameFromUrl) return decodeURIComponent(objectNameFromUrl)
+  if (/^https?:\/\//.test(thumbnail)) return ''
+
+  return thumbnail
+}
+
+const normalizeThumbnailForPayload = (value?: BannerThumbnail): string => {
+  const thumbnail = normalizeThumbnailValue(value)
+  if (!thumbnail) return ''
+  if (typeof thumbnail === 'string') return thumbnail.trim()
+
+  return getThumbnailObjectName(thumbnail)
+}
+
+const thumbnailUploadValue = computed<BannerThumbnail>({
+  get: () => form.thumbnail,
+  set: (value) => {
+    form.thumbnail = normalizeThumbnailValue(value) || null
+    bannerFormRef.value?.validateField('thumbnail').catch(() => undefined)
+  }
+})
+
+const getThumbnailUrl = (thumbnail?: BannerThumbnail) => {
+  if (!thumbnail) return ''
+
+  if (typeof thumbnail !== 'string') {
+    if (getThumbnailObjectName(thumbnail)) return ''
+    return thumbnail.secureUrl || thumbnail.secure_url || thumbnail.url || thumbnail.path || ''
+  }
+
   if (/^https?:\/\//.test(thumbnail)) return thumbnail
+  if (!thumbnail.startsWith('uploads/')) return ''
   return `${apiBaseUrl.value.replace(/\/api\/v\d+$/, '')}/${thumbnail.replace(/^\//, '')}`
+}
+
+const getBannerThumbnailUrl = (thumbnail?: BannerThumbnail) => {
+  const objectName = getThumbnailObjectName(thumbnail)
+  return (objectName ? thumbnailUrlCache.value[objectName] : '') || getThumbnailUrl(thumbnail)
+}
+
+const loadThumbnailUrl = async (thumbnail?: BannerThumbnail) => {
+  const objectName = getThumbnailObjectName(thumbnail)
+  if (!objectName || thumbnailUrlCache.value[objectName]) return
+
+  try {
+    const response = await $fetch<{ data?: { url?: string }; url?: string }>('minio/presigned-get', {
+      baseURL: `${apiBaseUrl.value}/`,
+      method: 'POST',
+      headers: requestHeaders.value,
+      body: { objectName, expiresInSeconds: 3600 }
+    })
+    const url = response.data?.url || response.url
+    if (url) thumbnailUrlCache.value = { ...thumbnailUrlCache.value, [objectName]: url }
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 const refreshProductOptions = async () => {
@@ -378,6 +482,7 @@ const refreshBanners = async () => {
       ...banner,
       isActive: banner.isActive ?? true
     }))
+    banners.value.forEach((banner) => loadThumbnailUrl(banner.thumbnail))
     totalItems.value = getTotalItems(response, items)
   } catch (error) {
     ElMessage.error(getErrorMessage(error))
@@ -392,7 +497,7 @@ const resetForm = () => {
     title: '',
     product: '',
     description: '',
-    thumbnail: '',
+    thumbnail: null,
     isActive: true
   })
   bannerFormRef.value?.clearValidate()
@@ -413,7 +518,7 @@ const openEditDialog = (banner: ApiBanner) => {
     title: banner.title || '',
     product: getProductId(banner.product),
     description: banner.description || '',
-    thumbnail: banner.thumbnail || '',
+    thumbnail: normalizeThumbnailValue(banner.thumbnail) || null,
     isActive: banner.isActive ?? true
   })
   ensureSelectedProductOption(banner.product)
@@ -424,7 +529,7 @@ const buildPayload = (): BannerPayload => {
   const payload: BannerPayload = {
     title: form.title.trim(),
     product: form.product,
-    thumbnail: form.thumbnail.trim(),
+    thumbnail: normalizeThumbnailForPayload(form.thumbnail),
     isActive: form.isActive
   }
 
