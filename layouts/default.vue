@@ -6,18 +6,17 @@
           <ul class="flex items-center gap-4">
             <li class="flex items-center gap-1.5">
               <Icon name="lucide:truck" class="h-4 w-4" />
-              <span class="hidden sm:inline">Free delivery for orders over $25</span>
-              <span class="sm:hidden">Free delivery</span>
+              <span class="hidden sm:inline">{{ $t('header.free_delivery_for_orders_over') }}</span>
             </li>
             <li class="hidden items-center gap-1.5 md:flex">
               <Icon name="lucide:badge-percent" class="h-4 w-4" />
-              <span>Daily deals up to 50% off</span>
+              <span>{{ $t('header.daily_deals_up_to') }}</span>
             </li>
           </ul>
 
           <div class="flex items-center gap-3">
             <NuxtLink v-if="canShowAdminLink" to="/admin/dashboard" class="hidden font-medium hover:text-emerald-950 sm:inline">
-              Admin
+              {{ $t('header.admin') }}
             </NuxtLink>
             <button
               class="grid h-6 w-6 place-items-center rounded-full transition hover:bg-emerald-100"
@@ -49,7 +48,7 @@
             <span class="grid h-10 w-10 place-items-center rounded-lg bg-emerald-700 text-white">
               <Icon name="lucide:shopping-bag" class="h-6 w-6" />
             </span>
-            <span class="hidden text-lg font-bold text-emerald-800 sm:inline">OrderMart</span>
+            <span class="hidden text-lg font-bold text-emerald-800 sm:inline">{{ $t('app.title') }}</span>
           </NuxtLink>
 
           <form class="relative hidden flex-1 md:block" @submit.prevent="submitSearch">
@@ -58,28 +57,43 @@
               v-model="search"
               class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 pl-11 pr-28 text-sm outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-100"
               type="search"
-              placeholder="Search products, SKU, or categories"
+              :placeholder="$t('header.search_product_or_category')"
             >
             <button
               class="absolute right-1.5 top-1/2 h-8 -translate-y-1/2 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800"
               type="submit"
             >
-              Search
+              {{ $t('header.search') }}
             </button>
           </form>
 
-          <nav class="ml-auto hidden items-center gap-1 lg:flex">
-            <NuxtLink
-              v-for="item in navItems"
-              :key="item.to"
-              :to="item.to"
-              class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
-            >
-              {{ item.label }}
-            </NuxtLink>
-          </nav>
-
           <div class="flex items-center gap-1">
+            <button
+              class="relative grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+              type="button"
+              aria-label="Cart"
+              @click="openCartDrawer"
+            >
+              <Icon name="lucide:shopping-cart" class="h-5 w-5" />
+              <span
+                v-if="pickedProductsCount"
+                class="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-rose-600 px-1 text-[10px] font-bold leading-none text-white"
+              >
+                {{ pickedProductsCount > 99 ? '99+' : pickedProductsCount }}
+              </span>
+            </button>
+            <button
+              class="relative grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+              type="button"
+              aria-label="Cart"
+            >
+              <Icon name="solar:bell-outline" class="h-5 w-5" />
+              <span
+                class="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-rose-600 px-1 text-[10px] font-bold leading-none text-white"
+              >
+                10
+              </span>
+            </button>
             <el-dropdown trigger="click" @command="handleAccountCommand">
               <button class="grid h-10 w-10 place-items-center overflow-hidden rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950" type="button" aria-label="Account">
                 <img
@@ -121,20 +135,6 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <button
-              class="relative grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
-              type="button"
-              aria-label="Cart"
-              @click="openCartDrawer"
-            >
-              <Icon name="lucide:shopping-cart" class="h-5 w-5" />
-              <span
-                v-if="pickedProductsCount"
-                class="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-rose-600 px-1 text-[10px] font-bold leading-none text-white"
-              >
-                {{ pickedProductsCount > 99 ? '99+' : pickedProductsCount }}
-              </span>
-            </button>
           </div>
         </div>
 
@@ -154,7 +154,7 @@
       <slot />
     </main>
 
-    <el-drawer v-model="isCartDrawerVisible" title="Picked products" direction="rtl" size="420px">
+    <el-drawer v-model="isCartDrawerVisible" :title="$t('cartDrawer.title')" direction="rtl" size="420px">
       <div v-loading="isPickedProductsLoading" class="flex min-h-full flex-col">
         <div v-if="pickedProducts.length" class="flex-1 space-y-3">
           <div
@@ -174,7 +174,7 @@
                 <button
                   class="grid h-7 w-7 shrink-0 place-items-center rounded-md text-slate-400 hover:bg-rose-50 hover:text-rose-600"
                   type="button"
-                  aria-label="Remove product"
+                  :aria-label="$t('cartDrawer.removeProduct')"
                   @click="removeCartOrder(order)"
                 >
                   <Icon name="lucide:trash-2" class="h-4 w-4" />
@@ -187,7 +187,7 @@
                     class="grid h-8 w-8 place-items-center text-slate-500 hover:bg-slate-50 disabled:opacity-40"
                     type="button"
                     :disabled="Number(order.quantity || 1) <= 1"
-                    aria-label="Decrease quantity"
+                    :aria-label="$t('cartDrawer.decreaseQuantity')"
                     @click="updateCartQuantity(order, Number(order.quantity || 1) - 1)"
                   >
                     <Icon name="lucide:minus" class="h-4 w-4" />
@@ -196,7 +196,7 @@
                   <button
                     class="grid h-8 w-8 place-items-center text-slate-500 hover:bg-slate-50"
                     type="button"
-                    aria-label="Increase quantity"
+                    :aria-label="$t('cartDrawer.increaseQuantity')"
                     @click="updateCartQuantity(order, Number(order.quantity || 1) + 1)"
                   >
                     <Icon name="lucide:plus" class="h-4 w-4" />
@@ -212,14 +212,14 @@
         <div v-else class="grid flex-1 place-items-center rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
           <div>
             <Icon name="lucide:shopping-cart" class="mx-auto h-10 w-10 text-slate-300" />
-            <h3 class="mt-3 text-base font-semibold text-slate-950">No picked products</h3>
-            <p class="mt-1 text-sm text-slate-500">Click a product to add it here.</p>
+            <h3 class="mt-3 text-base font-semibold text-slate-950">{{ $t('cartDrawer.emptyTitle') }}</h3>
+            <p class="mt-1 text-sm text-slate-500">{{ $t('cartDrawer.emptyDescription') }}</p>
           </div>
         </div>
 
         <div v-if="pickedProducts.length" class="mt-4 border-t border-slate-200 pt-4">
           <div class="flex items-center justify-between text-sm">
-            <span class="font-medium text-slate-600">Total</span>
+            <span class="font-medium text-slate-600">{{ $t('cartDrawer.total') }}</span>
             <span class="text-lg font-bold text-slate-950">{{ formatCartPrice(cartTotal) }}</span>
           </div>
         </div>
@@ -424,7 +424,7 @@
             <span class="text-lg font-bold text-emerald-800">OrderMart</span>
           </NuxtLink>
           <p class="mt-4 max-w-sm text-sm leading-6 text-slate-600">
-            Fast ordering for daily essentials, fresh stock, and simple product discovery.
+            {{ $t('footer.fast_ordering_for_daily_essentials_fresh_stock_and_simple_product_discovery') }}
           </p>
           <div class="mt-5 flex items-center gap-2">
             <a
@@ -440,25 +440,25 @@
         </div>
 
         <div>
-          <h3 class="text-sm font-semibold text-slate-950">Shop</h3>
+          <h3 class="text-sm font-semibold text-slate-950">{{ $t('footer.shop') }}</h3>
           <ul class="mt-4 space-y-3 text-sm text-slate-600">
             <li v-for="item in footerShopLinks" :key="item.to">
-              <NuxtLink :to="item.to" class="transition hover:text-emerald-700">{{ item.label }}</NuxtLink>
+              <NuxtLink :to="item.to" class="transition hover:text-emerald-700">{{ $t(item.label) }}</NuxtLink>
             </li>
           </ul>
         </div>
 
         <div>
-          <h3 class="text-sm font-semibold text-slate-950">Support</h3>
+          <h3 class="text-sm font-semibold text-slate-950">{{ $t('footer.support') }}</h3>
           <ul class="mt-4 space-y-3 text-sm text-slate-600">
             <li v-for="item in footerSupportLinks" :key="item.to">
-              <NuxtLink :to="item.to" class="transition hover:text-emerald-700">{{ item.label }}</NuxtLink>
+              <NuxtLink :to="item.to" class="transition hover:text-emerald-700">{{ $t(item.label) }}</NuxtLink>
             </li>
           </ul>
         </div>
 
         <div>
-          <h3 class="text-sm font-semibold text-slate-950">Contact</h3>
+          <h3 class="text-sm font-semibold text-slate-950">{{ $t('footer.contact') }}</h3>
           <ul class="mt-4 space-y-3 text-sm text-slate-600">
             <li class="flex gap-2">
               <Icon name="lucide:map-pin" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
@@ -478,11 +478,11 @@
 
       <div class="border-t border-slate-200">
         <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <p>© {{ currentYear }} OrderMart. All rights reserved.</p>
+          <p>{{ $t('footer.copyrice') }}</p>
           <div class="flex flex-wrap gap-x-4 gap-y-2">
-            <NuxtLink to="/" class="transition hover:text-emerald-700">Privacy</NuxtLink>
-            <NuxtLink to="/" class="transition hover:text-emerald-700">Terms</NuxtLink>
-            <NuxtLink v-if="canShowAdminLink" to="/admin/dashboard" class="transition hover:text-emerald-700">Admin console</NuxtLink>
+            <NuxtLink to="/" class="transition hover:text-emerald-700">{{ $t('footer.privacy') }}</NuxtLink>
+            <NuxtLink to="/" class="transition hover:text-emerald-700">{{ $t('footer.terms') }}</NuxtLink>
+            <NuxtLink v-if="canShowAdminLink" to="/admin/dashboard" class="transition hover:text-emerald-700">{{ $t('footer.admin_console') }}</NuxtLink>
           </div>
         </div>
       </div>
@@ -515,7 +515,6 @@ const {
 } = usePickedProducts()
 
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
-const currentYear = new Date().getFullYear()
 const apiBaseUrl = computed(() => String(config.public.apiBaseUrl).replace(/\/$/, ''))
 const requestHeaders = computed(() => ({
   ...(authToken.value ? { Authorization: `Bearer ${authToken.value}` } : {})
@@ -540,15 +539,15 @@ const navItems = [
 ]
 
 const footerShopLinks = [
-  { label: 'Categories', to: '/#categories' },
-  { label: 'Products', to: '/#products' },
-  { label: 'Daily deals', to: '/#products' },
+  { label: 'footer.categories', to: '/#categories' },
+  { label: 'footer.products', to: '/#products' },
+  { label: 'footer.daily_deals', to: '/#products' },
 ]
 
 const footerSupportLinks = [
-  { label: 'Help center', to: '/' },
-  { label: 'Delivery info', to: '/' },
-  { label: 'Order status', to: '/' },
+  { label: 'footer.help_center', to: '/' },
+  { label: 'footer.delivery_info', to: '/' },
+  { label: 'footer.order_status', to: '/' },
 ]
 
 const socialLinks = [

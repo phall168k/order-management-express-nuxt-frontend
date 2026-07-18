@@ -4,7 +4,7 @@
       <div class="mx-auto grid max-w-7xl gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[280px_1fr] lg:px-8">
         <aside class="hidden rounded-lg border border-slate-200 bg-white p-3 lg:block">
           <div class="mb-3 flex items-center justify-between px-2">
-            <h2 class="text-sm font-semibold text-slate-950">Categories</h2>
+            <h2 class="text-sm font-semibold text-slate-950">{{ t('storefront.categories') }}</h2>
             <Icon name="lucide:layout-grid" class="h-4 w-4 text-emerald-700" />
           </div>
 
@@ -45,12 +45,12 @@
                 <img :src="getBannerImage(banner)" :alt="banner.title" class="h-[320px] w-full object-cover sm:h-[380px]">
                 <div class="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/55 to-slate-950/10" />
                 <div class="absolute inset-y-0 left-0 flex max-w-2xl flex-col justify-center px-6 sm:px-10">
-                  <p class="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-emerald-200">{{ getBannerProductCode(banner) || 'Featured' }}</p>
+                  <p class="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-emerald-200">{{ getBannerProductCode(banner) || t('storefront.featured') }}</p>
                   <h1 class="text-3xl font-bold leading-tight sm:text-5xl">{{ banner.title }}</h1>
                   <p class="mt-4 max-w-md text-sm leading-6 text-slate-100 sm:text-base">{{ banner.description }}</p>
                   <div v-if="getBannerProductId(banner)" class="mt-6 flex flex-wrap items-center gap-3">
                     <button class="rounded-md bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700" type="button" @click="openProductDetail(getBannerProductId(banner))">
-                      View product
+                      {{ t('storefront.viewProduct') }}
                     </button>
                     <span v-if="getBannerProductPrice(banner)" class="text-sm font-semibold text-emerald-100">{{ getBannerProductPrice(banner) }}</span>
                   </div>
@@ -61,7 +61,7 @@
                 v-if="banners.length > 1"
                 class="absolute left-4 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/25"
                 type="button"
-                aria-label="Previous banner"
+                :aria-label="t('storefront.previousBanner')"
                 @click="showPreviousBanner"
               >
                 <Icon name="lucide:chevron-left" class="h-5 w-5" />
@@ -70,7 +70,7 @@
                 v-if="banners.length > 1"
                 class="absolute right-4 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/25"
                 type="button"
-                aria-label="Next banner"
+                :aria-label="t('storefront.nextBanner')"
                 @click="showNextBanner"
               >
                 <Icon name="lucide:chevron-right" class="h-5 w-5" />
@@ -82,7 +82,7 @@
                   class="h-2.5 rounded-full transition"
                   :class="activeBanner === index ? 'w-8 bg-white' : 'w-2.5 bg-white/45 hover:bg-white/70'"
                   type="button"
-                  :aria-label="`Show banner ${index + 1}`"
+                  :aria-label="t('storefront.showBanner', { number: index + 1 })"
                   @click="activeBanner = index"
                 />
               </div>
@@ -94,8 +94,8 @@
 
     <section class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:hidden">
       <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-base font-semibold text-slate-950">Categories</h2>
-        <span class="text-xs font-medium text-emerald-700">{{ totalProducts }} items</span>
+        <h2 class="text-base font-semibold text-slate-950">{{ t('storefront.categories') }}</h2>
+        <span class="text-xs font-medium text-emerald-700">{{ t('storefront.itemCount', totalProducts, { count: totalProducts }) }}</span>
       </div>
       <div class="flex gap-2 overflow-x-auto pb-1">
         <button
@@ -115,7 +115,7 @@
     <section id="products" class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">Catalog</p>
+          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">{{ t('storefront.catalog') }}</p>
           <h2 class="mt-1 text-2xl font-bold text-slate-950">{{ selectedCategoryName }}</h2>
         </div>
         <div class="relative w-full md:max-w-md">
@@ -124,9 +124,9 @@
             v-model="search"
             class="h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-10 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
             type="search"
-            placeholder="Search products"
+            :placeholder="t('storefront.searchProducts')"
           >
-          <button v-if="search" class="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700" type="button" aria-label="Clear search" @click="search = ''">
+          <button v-if="search" class="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700" type="button" :aria-label="t('storefront.clearSearch')" @click="search = ''">
             <Icon name="lucide:x" class="h-4 w-4" />
           </button>
         </div>
@@ -151,16 +151,16 @@
         >
           <button class="block w-full text-left" type="button" @click="openProductDetail(getProductId(product))">
             <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
-              <img :src="getProductImage(product)" :alt="product.nameEn" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
-              <span v-if="Number(product.discount || 0) > 0" class="absolute left-3 top-3 rounded-md bg-rose-600 px-2 py-1 text-xs font-bold text-white">Save {{ formatPrice(product.discount || 0) }}</span>
-              <span class="absolute right-3 top-3 rounded-md bg-white/90 px-2 py-1 text-xs font-semibold text-slate-700">{{ getAvailableStock(product.stock) }} left</span>
+              <img :src="getProductImage(product)" :alt="getProductName(product)" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+              <span v-if="Number(product.discount || 0) > 0" class="absolute left-3 top-3 rounded-md bg-rose-600 px-2 py-1 text-xs font-bold text-white">{{ t('storefront.save', { amount: formatPrice(product.discount || 0) }) }}</span>
+              <span class="absolute right-3 top-3 rounded-md bg-white/90 px-2 py-1 text-xs font-semibold text-slate-700">{{ t('storefront.stockLeft', { count: getAvailableStock(product.stock) }) }}</span>
             </div>
           </button>
           <div class="p-4">
             <button class="mb-3 block min-w-0 text-left" type="button" @click="openProductDetail(getProductId(product))">
               <p class="text-xs font-medium uppercase tracking-wide text-emerald-700">{{ getCategoryName(product.category) }}</p>
-              <h3 class="mt-1 truncate text-sm font-semibold text-slate-950">{{ product.nameEn }}</h3>
-              <p v-if="product.nameKh" class="mt-1 truncate text-xs text-slate-500">{{ product.nameKh }}</p>
+              <h3 class="mt-1 truncate text-sm font-semibold text-slate-950">{{ getProductName(product) }}</h3>
+              <p v-if="getProductSecondaryName(product)" class="mt-1 truncate text-xs text-slate-500">{{ getProductSecondaryName(product) }}</p>
             </button>
             <div class="flex items-end justify-between gap-3">
               <button class="text-left" type="button" @click="openProductDetail(getProductId(product))">
@@ -171,7 +171,7 @@
                 class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-slate-950 text-white transition hover:bg-emerald-700 disabled:cursor-wait disabled:bg-emerald-500"
                 type="button"
                 :disabled="isProductBeingPicked(getProductId(product))"
-                aria-label="Add to cart"
+                :aria-label="t('storefront.addToCart')"
                 @click="handlePickProduct(product)"
               >
                 <Icon v-if="isProductBeingPicked(getProductId(product))" name="lucide:loader-circle" class="h-5 w-5 animate-spin" />
@@ -184,52 +184,52 @@
 
       <div v-else class="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
         <Icon name="lucide:search-x" class="mx-auto h-10 w-10 text-slate-300" />
-        <h3 class="mt-3 text-base font-semibold text-slate-950">No products found</h3>
-        <p class="mt-1 text-sm text-slate-500">Try another keyword or category.</p>
+        <h3 class="mt-3 text-base font-semibold text-slate-950">{{ t('storefront.noProducts') }}</h3>
+        <p class="mt-1 text-sm text-slate-500">{{ t('storefront.noProductsHelp') }}</p>
       </div>
 
       <div ref="loadMoreTarget" class="h-12" />
 
       <div v-if="isLoadingMore" class="mt-2 flex items-center justify-center gap-2 text-sm text-slate-500">
         <Icon name="lucide:loader-circle" class="h-4 w-4 animate-spin" />
-        Loading more products
+        {{ t('storefront.loadingMore') }}
       </div>
 
       <p v-else-if="products.length && !hasMoreProducts" class="mt-4 text-center text-sm text-slate-400">
-        You reached the end of the catalog.
+        {{ t('storefront.endOfCatalog') }}
       </p>
     </section>
 
     <section v-if="pickedProducts.length" class="fixed bottom-5 left-1/2 z-30 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 sm:left-auto sm:right-6 sm:w-auto sm:translate-x-0">
       <div class="flex items-center justify-between gap-5 rounded-xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/10 sm:min-w-[380px]">
         <div class="min-w-0">
-          <p class="text-xs font-medium text-slate-500">{{ pickedProductsCount }} item{{ pickedProductsCount === 1 ? '' : 's' }} in cart</p>
+          <p class="text-xs font-medium text-slate-500">{{ t('storefront.cartCount', pickedProductsCount, { count: pickedProductsCount }) }}</p>
           <p class="truncate text-lg font-bold text-slate-950">{{ formatPrice(checkoutTotal) }}</p>
         </div>
         <button class="inline-flex h-11 shrink-0 items-center gap-2 rounded-lg bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800" type="button" @click="openCheckout">
           <Icon name="lucide:credit-card" class="h-4 w-4" />
-          Place order
+          {{ t('storefront.placeOrder') }}
         </button>
       </div>
     </section>
 
-    <el-dialog v-model="isCheckoutVisible" title="Complete your order" width="680px" destroy-on-close>
+    <el-dialog v-model="isCheckoutVisible" :title="t('storefront.checkout.title')" width="680px" destroy-on-close>
       <el-form ref="checkoutFormRef" :model="checkoutForm" :rules="checkoutRules" label-position="top" @submit.prevent="submitOrder">
         <div class="grid gap-4 sm:grid-cols-2">
-          <el-form-item label="Order code" prop="code">
+          <el-form-item :label="t('storefront.checkout.orderCode')" prop="code">
             <el-input v-model="checkoutForm.code" />
           </el-form-item>
-          <el-form-item label="Payment method" prop="paymentMethod">
-            <el-select v-model="checkoutForm.paymentMethod" class="w-full" filterable :loading="paymentMethodsLoading" placeholder="Select payment method">
+          <el-form-item :label="t('storefront.checkout.paymentMethod')" prop="paymentMethod">
+            <el-select v-model="checkoutForm.paymentMethod" class="w-full" filterable :loading="paymentMethodsLoading" :placeholder="t('storefront.checkout.selectPaymentMethod')">
               <el-option v-for="method in paymentMethods" :key="getPaymentMethodId(method)" :label="getPaymentMethodLabel(method)" :value="getPaymentMethodId(method)" />
             </el-select>
           </el-form-item>
         </div>
-        <el-form-item label="Delivery address" prop="address">
-          <el-input v-model="checkoutForm.address" placeholder="Enter the delivery address" />
+        <el-form-item :label="t('storefront.checkout.deliveryAddress')" prop="address">
+          <el-input v-model="checkoutForm.address" :placeholder="t('storefront.checkout.addressPlaceholder')" />
         </el-form-item>
-        <el-form-item label="Order note" prop="note">
-          <el-input v-model="checkoutForm.note" type="textarea" :rows="3" placeholder="Optional instructions" />
+        <el-form-item :label="t('storefront.checkout.orderNote')" prop="note">
+          <el-input v-model="checkoutForm.note" type="textarea" :rows="3" :placeholder="t('storefront.checkout.notePlaceholder')" />
         </el-form-item>
 
         <div class="rounded-lg border border-slate-200">
@@ -241,15 +241,15 @@
             <p class="shrink-0 text-sm font-bold text-slate-900">{{ formatPrice(getCheckoutLineTotal(order)) }}</p>
           </div>
           <div class="flex items-center justify-between bg-slate-50 px-4 py-3">
-            <span class="text-sm font-semibold text-slate-700">Total</span>
+            <span class="text-sm font-semibold text-slate-700">{{ t('storefront.checkout.total') }}</span>
             <span class="text-lg font-bold text-emerald-700">{{ formatPrice(checkoutTotal) }}</span>
           </div>
         </div>
       </el-form>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <el-button @click="isCheckoutVisible = false">Cancel</el-button>
-          <el-button type="primary" :loading="isSubmittingOrder" @click="submitOrder">Confirm order</el-button>
+          <el-button @click="isCheckoutVisible = false">{{ t('common.cancel') }}</el-button>
+          <el-button type="primary" :loading="isSubmittingOrder" @click="submitOrder">{{ t('storefront.checkout.confirmOrder') }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -257,8 +257,8 @@
     <el-dialog v-model="isDetailDialogVisible" width="860px" destroy-on-close class="product-detail-dialog">
       <template #header>
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Product detail</p>
-          <h3 class="mt-1 text-lg font-bold text-slate-950">{{ selectedProduct?.nameEn || 'Loading product' }}</h3>
+          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">{{ t('storefront.productDetail') }}</p>
+          <h3 class="mt-1 text-lg font-bold text-slate-950">{{ selectedProduct ? getProductName(selectedProduct) : t('storefront.loadingProduct') }}</h3>
         </div>
       </template>
 
@@ -268,7 +268,7 @@
 
       <div v-else-if="selectedProduct" class="grid gap-6 md:grid-cols-[minmax(0,360px)_1fr]">
         <div class="overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
-          <img :src="getProductImage(selectedProduct)" :alt="selectedProduct.nameEn" class="aspect-square h-full w-full object-cover">
+          <img :src="getProductImage(selectedProduct)" :alt="getProductName(selectedProduct)" class="aspect-square h-full w-full object-cover">
         </div>
         <div class="min-w-0">
           <div class="mb-4 flex flex-wrap gap-2">
@@ -276,21 +276,21 @@
             <span class="rounded bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{{ selectedProduct.code }}</span>
           </div>
 
-          <h2 class="text-2xl font-bold text-slate-950">{{ selectedProduct.nameEn }}</h2>
-          <p v-if="selectedProduct.nameKh" class="mt-1 text-sm text-slate-500">{{ selectedProduct.nameKh }}</p>
+          <h2 class="text-2xl font-bold text-slate-950">{{ getProductName(selectedProduct) }}</h2>
+          <p v-if="getProductSecondaryName(selectedProduct)" class="mt-1 text-sm text-slate-500">{{ getProductSecondaryName(selectedProduct) }}</p>
           <p v-if="selectedProduct.description" class="mt-4 text-sm leading-6 text-slate-600">{{ selectedProduct.description }}</p>
 
           <div class="mt-6 grid gap-3 sm:grid-cols-3">
             <div class="rounded-lg border border-slate-200 bg-white p-3">
-              <p class="text-xs text-slate-500">Price</p>
+              <p class="text-xs text-slate-500">{{ t('storefront.price') }}</p>
               <p class="mt-1 text-lg font-bold text-emerald-700">{{ formatPrice(getProductFinalPrice(selectedProduct)) }}</p>
             </div>
             <div class="rounded-lg border border-slate-200 bg-white p-3">
-              <p class="text-xs text-slate-500">Discount</p>
+              <p class="text-xs text-slate-500">{{ t('storefront.discount') }}</p>
               <p class="mt-1 text-lg font-bold text-slate-950">{{ formatPrice(selectedProduct.discount || 0) }}</p>
             </div>
             <div class="rounded-lg border border-slate-200 bg-white p-3">
-              <p class="text-xs text-slate-500">Stock</p>
+              <p class="text-xs text-slate-500">{{ t('storefront.stock') }}</p>
               <p class="mt-1 text-lg font-bold text-slate-950">{{ getAvailableStock(selectedProduct.stock) }}</p>
             </div>
           </div>
@@ -303,7 +303,7 @@
           >
             <Icon v-if="isProductBeingPicked(getProductId(selectedProduct))" name="lucide:loader-circle" class="h-4 w-4 animate-spin" />
             <Icon v-else name="lucide:shopping-cart" class="h-4 w-4" />
-            Add to cart
+            {{ t('storefront.addToCart') }}
           </button>
         </div>
       </div>
@@ -317,7 +317,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import type { PickedOrder, PickedProduct } from '~/composables/usePickedProducts'
 
 definePageMeta({
-  title: 'តោះចាយលុយ!'
+  title: 'Storefront'
 })
 
 type ApiCategory = {
@@ -412,6 +412,8 @@ type DetailResponse<T> = {
 
 const config = useRuntimeConfig()
 const route = useRoute()
+const { t, locale } = useI18n()
+useHead(() => ({ title: t('storefront.pageTitle') }))
 const authToken = useCookie<string | null>('auth_token')
 const { user, isAuthenticated } = useAuth()
 const {
@@ -462,9 +464,9 @@ const paymentMethods = ref<PaymentMethod[]>([])
 const checkoutFormRef = ref<FormInstance>()
 const checkoutForm = reactive({ code: '', paymentMethod: '', address: '', note: '' })
 const checkoutRules: FormRules = {
-  code: [{ required: true, message: 'Order code is required', trigger: 'blur' }],
-  paymentMethod: [{ required: true, message: 'Select a payment method', trigger: 'change' }],
-  address: [{ required: true, message: 'Delivery address is required', trigger: 'blur' }]
+  code: [{ required: true, message: () => t('storefront.validation.orderCodeRequired'), trigger: 'blur' }],
+  paymentMethod: [{ required: true, message: () => t('storefront.validation.paymentMethodRequired'), trigger: 'change' }],
+  address: [{ required: true, message: () => t('storefront.validation.addressRequired'), trigger: 'blur' }]
 }
 
 let carouselTimer: ReturnType<typeof setInterval> | undefined
@@ -474,11 +476,17 @@ let loadMoreObserver: IntersectionObserver | undefined
 const fallbackBanners: ApiBanner[] = [
   {
     id: 'fallback-market',
-    title: 'Fresh products ready for order',
-    description: 'Browse available products by category and quickly inspect price, discount, and stock.',
+    title: '',
+    description: '',
     thumbnail: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1400&q=80'
   }
 ]
+
+const getFallbackBanners = (): ApiBanner[] => fallbackBanners.map((banner) => ({
+  ...banner,
+  title: t('storefront.fallbackBanner.title'),
+  description: t('storefront.fallbackBanner.description')
+}))
 
 const fallbackProductImages = [
   'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=700&q=80',
@@ -496,7 +504,7 @@ const hasMoreProducts = computed(() => products.value.length < totalProducts.val
 const categories = computed<Category[]>(() => [
   {
     id: 'all',
-    name: 'All products',
+    name: t('storefront.allProducts'),
     icon: 'lucide:store',
     count: totalProducts.value
   },
@@ -510,7 +518,7 @@ const categories = computed<Category[]>(() => [
 ])
 
 const selectedCategoryName = computed(() => {
-  return categories.value.find((category) => category.id === selectedCategory.value)?.name || 'Products'
+  return categories.value.find((category) => category.id === selectedCategory.value)?.name || t('storefront.products')
 })
 
 const extractCollection = <T>(response: CollectionResponse<T> | T[]): T[] => {
@@ -541,7 +549,21 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 const getCategoryId = (category?: ApiCategory) => category?._id || category?.id || category?.code || ''
 
 const getCategoryName = (category?: ApiCategory) => {
-  return category?.nameEn || category?.nameKh || category?.code || 'Uncategorized'
+  return (locale.value === 'km' ? category?.nameKh || category?.nameEn : category?.nameEn || category?.nameKh)
+    || category?.code
+    || t('storefront.uncategorized')
+}
+
+const getProductName = (product?: ApiProduct | null) => {
+  if (!product) return t('storefront.product')
+  return (locale.value === 'km' ? product.nameKh || product.nameEn : product.nameEn || product.nameKh)
+    || product.code
+    || t('storefront.product')
+}
+
+const getProductSecondaryName = (product?: ApiProduct | null) => {
+  if (!product) return ''
+  return locale.value === 'km' ? product.nameEn : product.nameKh || ''
 }
 
 const isProductObject = (product?: string | ApiProduct): product is ApiProduct => {
@@ -642,7 +664,7 @@ const getDiscountedPrice = (unitPrice = 0, discount = 0) => {
 const getProductFinalPrice = (product: ApiProduct) => getDiscountedPrice(product.unitPrice, product.discount)
 
 const formatPrice = (value = 0) => {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat(locale.value === 'km' ? 'km-KH' : 'en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2
@@ -720,7 +742,7 @@ const refreshCategories = async () => {
     })
     categoryOptions.value = extractCollection(response)
   } catch (error) {
-    ElMessage.error(getErrorMessage(error, 'Failed to load categories.'))
+    ElMessage.error(getErrorMessage(error, t('storefront.errors.categories')))
   } finally {
     categoryLoading.value = false
   }
@@ -739,12 +761,12 @@ const refreshBanners = async () => {
     }))
 
     if (!banners.value.length) {
-      banners.value = fallbackBanners
+      banners.value = getFallbackBanners()
     }
     loadBannerImageUrls(banners.value)
   } catch (error) {
-    banners.value = fallbackBanners
-    ElMessage.error(getErrorMessage(error, 'Failed to load banners.'))
+    banners.value = getFallbackBanners()
+    ElMessage.error(getErrorMessage(error, t('storefront.errors.banners')))
   } finally {
     bannerLoading.value = false
   }
@@ -772,7 +794,7 @@ const refreshProducts = async (mode: 'replace' | 'append' = 'replace') => {
     loadProductImageUrls(items)
     totalProducts.value = response.pagination?.total ?? products.value.length
   } catch (error) {
-    ElMessage.error(getErrorMessage(error, 'Failed to load products.'))
+    ElMessage.error(getErrorMessage(error, t('storefront.errors.products')))
     if (mode === 'replace') {
       products.value = []
       totalProducts.value = 0
@@ -815,7 +837,7 @@ const openProductDetail = async (productId?: string) => {
     selectedProduct.value = response.data || selectedProduct.value
     loadThumbnailUrl(selectedProduct.value?.thumbnail)
   } catch (error) {
-    ElMessage.error(getErrorMessage(error, 'Failed to load product detail.'))
+    ElMessage.error(getErrorMessage(error, t('storefront.errors.productDetail')))
   } finally {
     detailLoading.value = false
   }
@@ -833,9 +855,9 @@ const handlePickProduct = async (product?: ApiProduct | null) => {
 
   try {
     await pickProduct(productId)
-    ElMessage.success('Product added to cart')
+    ElMessage.success(t('storefront.messages.addedToCart'))
   } catch (error) {
-    ElMessage.error(getErrorMessage(error, 'Failed to pick product.'))
+    ElMessage.error(getErrorMessage(error, t('storefront.errors.addToCart')))
   } finally {
     pickingProductIds.value = pickingProductIds.value.filter((id) => id !== productId)
   }
@@ -847,7 +869,7 @@ const getCheckoutProduct = (order: PickedOrder): PickedProduct | null => {
 
 const getCheckoutProductName = (order: PickedOrder) => {
   const product = getCheckoutProduct(order)
-  return product?.nameEn || product?.nameKh || product?.code || getPickedProductId(order.product) || 'Product'
+  return product ? getProductName(product as ApiProduct) : getPickedProductId(order.product) || t('storefront.product')
 }
 
 const getCheckoutUnitPrice = (order: PickedOrder) => {
@@ -863,7 +885,7 @@ const checkoutTotal = computed(() => pickedProducts.value.reduce((total, order) 
 
 const getPaymentMethodId = (method: PaymentMethod) => method._id || method.id || ''
 const getPaymentMethodLabel = (method: PaymentMethod) => {
-  return [method.merchantName, method.bankAccount].filter(Boolean).join(' — ') || 'Payment method'
+  return [method.merchantName, method.bankAccount].filter(Boolean).join(' — ') || t('storefront.checkout.paymentMethod')
 }
 
 const extractPaymentMethods = (response: PaymentMethodsResponse): PaymentMethod[] => {
@@ -888,7 +910,7 @@ const loadPaymentMethods = async () => {
     })
     paymentMethods.value = extractPaymentMethods(response).filter((method) => method.isActive !== false && getPaymentMethodId(method))
   } catch (error) {
-    ElMessage.error(getErrorMessage(error, 'Failed to load payment methods.'))
+    ElMessage.error(getErrorMessage(error, t('storefront.errors.paymentMethods')))
   } finally {
     paymentMethodsLoading.value = false
   }
@@ -920,7 +942,7 @@ const submitOrder = async () => {
 
   const customerId = user.value?._id || user.value?.id
   if (!customerId) {
-    ElMessage.error('Your customer account could not be identified. Please sign in again.')
+    ElMessage.error(t('storefront.errors.customerNotFound'))
     return
   }
 
@@ -936,7 +958,7 @@ const submitOrder = async () => {
   })
 
   if (items.some((item) => !item.product)) {
-    ElMessage.error('One or more cart products are invalid. Please refresh your cart.')
+    ElMessage.error(t('storefront.errors.invalidCart'))
     return
   }
 
@@ -963,9 +985,9 @@ const submitOrder = async () => {
     isCheckoutVisible.value = false
     checkoutForm.paymentMethod = ''
     checkoutForm.note = ''
-    ElMessage.success('Your order was placed successfully.')
+    ElMessage.success(t('storefront.messages.orderPlaced'))
   } catch (error) {
-    ElMessage.error(getErrorMessage(error, 'Failed to place your order.'))
+    ElMessage.error(getErrorMessage(error, t('storefront.errors.placeOrder')))
   } finally {
     isSubmittingOrder.value = false
   }

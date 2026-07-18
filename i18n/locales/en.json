@@ -2,7 +2,40 @@
   "app": {
     "name": "Order Manager",
     "admin": "Admin Console",
-    "subtitle": "Operations workspace"
+    "subtitle": "Operations workspace",
+    "title": "Let's Shopping"
+  },
+  "header": {
+    "free_delivery_for_orders_over": "Free delivery for orders $25",
+    "daily_deals_up_to": "Daily deals up to 50% off",
+    "search": "Search",
+    "search_product_or_category": "Search product, or categories" ,
+    "admin": "Admin"
+  },
+  "footer": {
+    "fast_ordering_for_daily_essentials_fresh_stock_and_simple_product_discovery": "Fast ordering for daily essentials, fresh stock, and simple product discovery.",
+    "categories": "Categories",
+    "products": "Products",
+    "daily_deals": "Daily deals",
+    "shop": "Shop",
+    "support": "Support",
+    "help_center": "Help center",
+    "delivery_info": "Delivery info",
+    "order_status": "Order status",
+    "contact": "Contact",
+    "copyrice": "2026 OrderMart. All right reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "admin_console": "Admin console"
+  },
+  "cartDrawer": {
+    "title": "Picked products",
+    "removeProduct": "Remove product",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
+    "emptyTitle": "No picked products",
+    "emptyDescription": "Click a product to add it here.",
+    "total": "Total"
   },
   "account": {
     "menu": "Account menu",
@@ -74,6 +107,73 @@
       "shipping": "Shipping",
       "cancelled": "Cancelled",
       "unknown": "Unknown"
+    }
+  },
+  "storefront": {
+    "pageTitle": "Storefront",
+    "categories": "Categories",
+    "allProducts": "All products",
+    "products": "Products",
+    "product": "Product",
+    "uncategorized": "Uncategorized",
+    "featured": "Featured",
+    "viewProduct": "View product",
+    "previousBanner": "Previous banner",
+    "nextBanner": "Next banner",
+    "showBanner": "Show banner {number}",
+    "itemCount": "{count} item | {count} items",
+    "catalog": "Catalog",
+    "searchProducts": "Search products",
+    "clearSearch": "Clear search",
+    "save": "Save {amount}",
+    "stockLeft": "{count} left",
+    "addToCart": "Add to cart",
+    "noProducts": "No products found",
+    "noProductsHelp": "Try another keyword or category.",
+    "loadingMore": "Loading more products",
+    "endOfCatalog": "You reached the end of the catalog.",
+    "cartCount": "{count} item in cart | {count} items in cart",
+    "placeOrder": "Place order",
+    "productDetail": "Product detail",
+    "loadingProduct": "Loading product",
+    "price": "Price",
+    "discount": "Discount",
+    "stock": "Stock",
+    "fallbackBanner": {
+      "title": "Fresh products ready for order",
+      "description": "Browse available products by category and quickly inspect price, discount, and stock."
+    },
+    "checkout": {
+      "title": "Complete your order",
+      "orderCode": "Order code",
+      "paymentMethod": "Payment method",
+      "selectPaymentMethod": "Select payment method",
+      "deliveryAddress": "Delivery address",
+      "addressPlaceholder": "Enter the delivery address",
+      "orderNote": "Order note",
+      "notePlaceholder": "Optional instructions",
+      "total": "Total",
+      "confirmOrder": "Confirm order"
+    },
+    "validation": {
+      "orderCodeRequired": "Order code is required",
+      "paymentMethodRequired": "Select a payment method",
+      "addressRequired": "Delivery address is required"
+    },
+    "messages": {
+      "addedToCart": "Product added to cart",
+      "orderPlaced": "Your order was placed successfully."
+    },
+    "errors": {
+      "categories": "Failed to load categories.",
+      "banners": "Failed to load banners.",
+      "products": "Failed to load products.",
+      "productDetail": "Failed to load product detail.",
+      "addToCart": "Failed to add product to cart.",
+      "paymentMethods": "Failed to load payment methods.",
+      "customerNotFound": "Your customer account could not be identified. Please sign in again.",
+      "invalidCart": "One or more cart products are invalid. Please refresh your cart.",
+      "placeOrder": "Failed to place your order."
     }
   },
   "users": {

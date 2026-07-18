@@ -2,7 +2,40 @@
   "app": {
     "name": "កម្មវិធីគ្រប់គ្រងការបញ្ជាទិញ",
     "admin": "ផ្ទាំងគ្រប់គ្រង",
-    "subtitle": "កន្លែងធ្វើការប្រតិបត្តិការ"
+    "subtitle": "កន្លែងធ្វើការប្រតិបត្តិការ",
+    "title": "តោះចាយលុយ"
+  },
+  "header": {
+    "free_delivery_for_orders_over": "ដឹកជញ្ជូនដោយឥតគិតថ្លៃ សម្រាប់ការបញ្ជាទិញលើសពី $25",
+    "daily_deals_up_to": "ការបញ្ចុះតម្លៃប្រចាំថ្ងៃរហូតដល់ 50%",
+    "search": "ស្វែងរក",
+    "search_product_or_category": "ស្វែងរកផលិតផល ឬប្រភេទទំនិញ",
+    "admin": "ផ្ទាំងគ្រប់គ្រង"
+    },
+  "footer": {
+    "fast_ordering_for_daily_essentials_fresh_stock_and_simple_product_discovery": "បញ្ជាទិញទំនិញប្រើប្រាស់ប្រចាំថ្ងៃបានរហ័ស មានស្តុកថ្មីៗ និងងាយស្រួលស្វែងរកផលិតផល។",
+    "categories": "ប្រភេទទំនិញ",
+    "products": "ផលិតផល",
+    "daily_deals": "ការបញ្ចុះតម្លៃប្រចាំថ្ងៃ",
+    "shop": "ហាង",
+    "support": "ជំនួយ",
+    "help_center": "មជ្ឈមណ្ឌលជំនួយ",
+    "delivery_info": "ព័ត៌មានអំពីការដឹកជញ្ជូន",
+    "order_status": "ស្ថានភាពការបញ្ជាទិញ",
+    "contact": "ទំនាក់ទំនង",
+    "copyrice": "© 2026 OrderMart. រក្សាសិទ្ធិគ្រប់យ៉ាង។",
+    "privacy": "គោលការណ៍ឯកជនភាព",
+    "terms": "លក្ខខណ្ឌប្រើប្រាស់",
+    "admin_console": "ផ្ទាំងគ្រប់គ្រង"
+  },
+  "cartDrawer": {
+    "title": "ទំនិញដែលបានជ្រើសរើស",
+    "removeProduct": "ដកទំនិញចេញ",
+    "decreaseQuantity": "បន្ថយចំនួន",
+    "increaseQuantity": "បង្កើនចំនួន",
+    "emptyTitle": "មិនមានទំនិញដែលបានជ្រើសរើស",
+    "emptyDescription": "ចុចលើទំនិញដើម្បីបន្ថែមវានៅទីនេះ។",
+    "total": "សរុប"
   },
   "account": {
     "menu": "ម៉ឺនុយគណនី",
@@ -74,6 +107,73 @@
       "shipping": "កំពុងដឹកជញ្ជូន",
       "cancelled": "បានបោះបង់",
       "unknown": "មិនស្គាល់"
+    }
+  },
+  "storefront": {
+    "pageTitle": "ហាងទំនិញ",
+    "categories": "ប្រភេទទំនិញ",
+    "allProducts": "ទំនិញទាំងអស់",
+    "products": "ទំនិញ",
+    "product": "ទំនិញ",
+    "uncategorized": "មិនមានប្រភេទ",
+    "featured": "ទំនិញពិសេស",
+    "viewProduct": "មើលទំនិញ",
+    "previousBanner": "បេនន័រមុន",
+    "nextBanner": "បេនន័របន្ទាប់",
+    "showBanner": "បង្ហាញបេនន័រទី {number}",
+    "itemCount": "{count} ទំនិញ",
+    "catalog": "បញ្ជីទំនិញ",
+    "searchProducts": "ស្វែងរកទំនិញ",
+    "clearSearch": "លុបការស្វែងរក",
+    "save": "ចំណេញ {amount}",
+    "stockLeft": "នៅសល់ {count}",
+    "addToCart": "ដាក់ចូលកន្ត្រក",
+    "noProducts": "រកមិនឃើញទំនិញ",
+    "noProductsHelp": "សាកល្បងពាក្យគន្លឹះ ឬប្រភេទទំនិញផ្សេង។",
+    "loadingMore": "កំពុងផ្ទុកទំនិញបន្ថែម",
+    "endOfCatalog": "អ្នកបានមើលដល់ចុងបញ្ជីទំនិញហើយ។",
+    "cartCount": "ទំនិញ {count} ក្នុងកន្ត្រក",
+    "placeOrder": "បញ្ជាទិញ",
+    "productDetail": "ព័ត៌មានលម្អិតទំនិញ",
+    "loadingProduct": "កំពុងផ្ទុកទំនិញ",
+    "price": "តម្លៃ",
+    "discount": "បញ្ចុះតម្លៃ",
+    "stock": "ស្តុក",
+    "fallbackBanner": {
+      "title": "ទំនិញស្រស់ៗរួចរាល់សម្រាប់ការបញ្ជាទិញ",
+      "description": "មើលទំនិញតាមប្រភេទ និងពិនិត្យតម្លៃ ការបញ្ចុះតម្លៃ និងស្តុកបានយ៉ាងរហ័ស។"
+    },
+    "checkout": {
+      "title": "បំពេញការបញ្ជាទិញរបស់អ្នក",
+      "orderCode": "លេខកូដបញ្ជាទិញ",
+      "paymentMethod": "វិធីបង់ប្រាក់",
+      "selectPaymentMethod": "ជ្រើសរើសវិធីបង់ប្រាក់",
+      "deliveryAddress": "អាសយដ្ឋានដឹកជញ្ជូន",
+      "addressPlaceholder": "បញ្ចូលអាសយដ្ឋានដឹកជញ្ជូន",
+      "orderNote": "ចំណាំការបញ្ជាទិញ",
+      "notePlaceholder": "ការណែនាំបន្ថែម (មិនចាំបាច់)",
+      "total": "សរុប",
+      "confirmOrder": "បញ្ជាក់ការបញ្ជាទិញ"
+    },
+    "validation": {
+      "orderCodeRequired": "ត្រូវការលេខកូដបញ្ជាទិញ",
+      "paymentMethodRequired": "សូមជ្រើសរើសវិធីបង់ប្រាក់",
+      "addressRequired": "ត្រូវការអាសយដ្ឋានដឹកជញ្ជូន"
+    },
+    "messages": {
+      "addedToCart": "បានដាក់ទំនិញចូលកន្ត្រក",
+      "orderPlaced": "ការបញ្ជាទិញរបស់អ្នកបានជោគជ័យ។"
+    },
+    "errors": {
+      "categories": "មិនអាចផ្ទុកប្រភេទទំនិញបានទេ។",
+      "banners": "មិនអាចផ្ទុកបេនន័របានទេ។",
+      "products": "មិនអាចផ្ទុកទំនិញបានទេ។",
+      "productDetail": "មិនអាចផ្ទុកព័ត៌មានលម្អិតទំនិញបានទេ។",
+      "addToCart": "មិនអាចដាក់ទំនិញចូលកន្ត្រកបានទេ។",
+      "paymentMethods": "មិនអាចផ្ទុកវិធីបង់ប្រាក់បានទេ។",
+      "customerNotFound": "រកមិនឃើញគណនីអតិថិជនរបស់អ្នក។ សូមចូលប្រើម្តងទៀត។",
+      "invalidCart": "ទំនិញមួយ ឬច្រើនក្នុងកន្ត្រកមិនត្រឹមត្រូវ។ សូមផ្ទុកកន្ត្រកឡើងវិញ។",
+      "placeOrder": "មិនអាចបញ្ជាទិញបានទេ។"
     }
   },
   "users": {
