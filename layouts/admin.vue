@@ -132,6 +132,7 @@ const menuItems = [
   { path: '/admin/inventory/stock-adjustment', label: 'menu.stockAdjustments', icon: 'lucide:package-check', permission: 'stock-adjustment.read' },
   { path: '/admin/saling/banner', label: 'menu.banners', icon: 'lucide:image', permission: 'banner.read' },
   { path: '/admin/saling/sale', label: 'menu.sales', icon: 'lucide:shopping-cart', permission: 'sale.read' },
+  { path: '/admin/system/notification-type', label: 'menu.notificationTypes', icon: 'lucide:bell-ring', permission: 'notification-type.read' },
   { path: '/admin/system/payment-method', label: 'menu.paymentMethods', icon: 'lucide:credit-card', permission: 'payment-method.read' },
   { path: '/admin/system/user-profile', label: 'menu.userProfiles', icon: 'lucide:id-card', permission: 'user-profile.read' },
   { path: '/admin/system/user', label: 'menu.users', icon: 'lucide:users', permission: 'user.read' },

@@ -58,6 +58,7 @@
     "stockAdjustments": "កែតម្រូវស្តុក",
     "banners": "បេនន័រ",
     "sales": "ការលក់",
+    "notificationTypes": "ប្រភេទការជូនដំណឹង",
     "paymentMethods": "វិធីបង់ប្រាក់",
     "userProfiles": "ប្រវត្តិរូបអ្នកប្រើ",
     "users": "អ្នកប្រើប្រាស់",
@@ -562,6 +563,44 @@
     "confirmDelete": {
       "title": "លុបការលក់",
       "message": "លុបការលក់ \"{code}\"?"
+    }
+  },
+  "notificationTypes": {
+    "title": "ប្រភេទការជូនដំណឹង",
+    "description": "គ្រប់គ្រងឈ្មោះ និងរូបតំណាងការជូនដំណឹងដែលប្រើក្នុងប្រព័ន្ធ។",
+    "name": "ឈ្មោះ",
+    "icon": "រូបតំណាង",
+    "iconHelp": "បញ្ចូលឈ្មោះ Nuxt Icon ឧទាហរណ៍ icon-park-outline:ad-product។",
+    "createdBy": "បង្កើតដោយ",
+    "createdAt": "បង្កើតនៅ",
+    "actions": {
+      "new": "ប្រភេទការជូនដំណឹងថ្មី",
+      "create": "បង្កើតប្រភេទការជូនដំណឹង",
+      "edit": "កែប្រែប្រភេទការជូនដំណឹង",
+      "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+      "delete": "លុបប្រភេទការជូនដំណឹង"
+    },
+    "dialog": {
+      "createTitle": "ប្រភេទការជូនដំណឹងថ្មី",
+      "editTitle": "កែប្រែប្រភេទការជូនដំណឹង"
+    },
+    "placeholders": {
+      "name": "ការបញ្ជាទិញថ្មី",
+      "icon": "icon-park-outline:ad-product"
+    },
+    "validation": {
+      "nameRequired": "ត្រូវការឈ្មោះ",
+      "iconRequired": "ត្រូវការរូបតំណាង"
+    },
+    "messages": {
+      "created": "បានបង្កើតប្រភេទការជូនដំណឹង",
+      "updated": "បានកែប្រែប្រភេទការជូនដំណឹង",
+      "deleted": "បានលុបប្រភេទការជូនដំណឹង",
+      "missingId": "មិនអាចលុបប្រភេទការជូនដំណឹងនេះបានទេ ព្រោះគ្មានលេខសម្គាល់។"
+    },
+    "confirmDelete": {
+      "title": "លុបប្រភេទការជូនដំណឹង",
+      "message": "លុបប្រភេទការជូនដំណឹង \"{name}\"?"
     }
   },
   "paymentMethods": {

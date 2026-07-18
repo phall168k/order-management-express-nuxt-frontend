@@ -58,6 +58,7 @@
     "stockAdjustments": "Stock adjustment",
     "banners": "Banners",
     "sales": "Sales",
+    "notificationTypes": "Notification types",
     "paymentMethods": "Payment methods",
     "userProfiles": "User profiles",
     "users": "Users",
@@ -562,6 +563,44 @@
     "confirmDelete": {
       "title": "Delete sale",
       "message": "Delete sale \"{code}\"?"
+    }
+  },
+  "notificationTypes": {
+    "title": "Notification types",
+    "description": "Manage notification names and icons used throughout the system.",
+    "name": "Name",
+    "icon": "Icon",
+    "iconHelp": "Enter a Nuxt Icon name, for example icon-park-outline:ad-product.",
+    "createdBy": "Created by",
+    "createdAt": "Created at",
+    "actions": {
+      "new": "New notification type",
+      "create": "Create notification type",
+      "edit": "Edit notification type",
+      "save": "Save changes",
+      "delete": "Delete notification type"
+    },
+    "dialog": {
+      "createTitle": "New notification type",
+      "editTitle": "Edit notification type"
+    },
+    "placeholders": {
+      "name": "New order",
+      "icon": "icon-park-outline:ad-product"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "iconRequired": "Icon is required"
+    },
+    "messages": {
+      "created": "Notification type created",
+      "updated": "Notification type updated",
+      "deleted": "Notification type deleted",
+      "missingId": "This notification type cannot be deleted because it has no id."
+    },
+    "confirmDelete": {
+      "title": "Delete notification type",
+      "message": "Delete notification type \"{name}\"?"
     }
   },
   "paymentMethods": {
