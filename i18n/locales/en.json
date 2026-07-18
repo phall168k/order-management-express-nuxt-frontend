@@ -58,6 +58,7 @@
     "stockAdjustments": "Stock adjustment",
     "banners": "Banners",
     "sales": "Sales",
+    "notifications": "Notifications",
     "notificationTypes": "Notification types",
     "paymentMethods": "Payment methods",
     "userProfiles": "User profiles",
@@ -564,6 +565,26 @@
       "title": "Delete sale",
       "message": "Delete sale \"{code}\"?"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Create and manage notifications sent to system users.",
+    "notification": "Notification",
+    "subject": "Subject",
+    "sender": "Sender",
+    "receiver": "Receiver",
+    "type": "Notification type",
+    "link": "Link",
+    "isSeen": "Marked as seen",
+    "createdAt": "Created at",
+    "status": { "seen": "Seen", "unseen": "Unseen" },
+    "form": { "title": "Title" },
+    "actions": { "new": "New notification", "create": "Create notification", "edit": "Edit notification", "save": "Save changes", "delete": "Delete notification" },
+    "dialog": { "createTitle": "New notification", "editTitle": "Edit notification" },
+    "placeholders": { "title": "New order", "subject": "Order #SO-001 was created", "receiver": "Select receiver", "type": "Select notification type", "link": "/orders/SO-001" },
+    "validation": { "titleRequired": "Title is required", "subjectRequired": "Subject is required", "receiverRequired": "Receiver is required", "typeRequired": "Notification type is required" },
+    "messages": { "created": "Notification created", "updated": "Notification updated", "deleted": "Notification deleted", "missingId": "This notification cannot be deleted because it has no id." },
+    "confirmDelete": { "title": "Delete notification", "message": "Delete notification \"{title}\"?" }
   },
   "notificationTypes": {
     "title": "Notification types",

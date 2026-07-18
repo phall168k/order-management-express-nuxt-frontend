@@ -58,6 +58,7 @@
     "stockAdjustments": "កែតម្រូវស្តុក",
     "banners": "បេនន័រ",
     "sales": "ការលក់",
+    "notifications": "ការជូនដំណឹង",
     "notificationTypes": "ប្រភេទការជូនដំណឹង",
     "paymentMethods": "វិធីបង់ប្រាក់",
     "userProfiles": "ប្រវត្តិរូបអ្នកប្រើ",
@@ -564,6 +565,26 @@
       "title": "លុបការលក់",
       "message": "លុបការលក់ \"{code}\"?"
     }
+  },
+  "notifications": {
+    "title": "ការជូនដំណឹង",
+    "description": "បង្កើត និងគ្រប់គ្រងការជូនដំណឹងដែលផ្ញើទៅអ្នកប្រើប្រព័ន្ធ។",
+    "notification": "ការជូនដំណឹង",
+    "subject": "ខ្លឹមសារ",
+    "sender": "អ្នកផ្ញើ",
+    "receiver": "អ្នកទទួល",
+    "type": "ប្រភេទការជូនដំណឹង",
+    "link": "តំណភ្ជាប់",
+    "isSeen": "សម្គាល់ថាបានមើល",
+    "createdAt": "បង្កើតនៅ",
+    "status": { "seen": "បានមើល", "unseen": "មិនទាន់មើល" },
+    "form": { "title": "ចំណងជើង" },
+    "actions": { "new": "ការជូនដំណឹងថ្មី", "create": "បង្កើតការជូនដំណឹង", "edit": "កែប្រែការជូនដំណឹង", "save": "រក្សាទុកការផ្លាស់ប្តូរ", "delete": "លុបការជូនដំណឹង" },
+    "dialog": { "createTitle": "ការជូនដំណឹងថ្មី", "editTitle": "កែប្រែការជូនដំណឹង" },
+    "placeholders": { "title": "ការបញ្ជាទិញថ្មី", "subject": "ការបញ្ជាទិញ #SO-001 ត្រូវបានបង្កើត", "receiver": "ជ្រើសរើសអ្នកទទួល", "type": "ជ្រើសរើសប្រភេទការជូនដំណឹង", "link": "/orders/SO-001" },
+    "validation": { "titleRequired": "ត្រូវការចំណងជើង", "subjectRequired": "ត្រូវការខ្លឹមសារ", "receiverRequired": "ត្រូវការអ្នកទទួល", "typeRequired": "ត្រូវការប្រភេទការជូនដំណឹង" },
+    "messages": { "created": "បានបង្កើតការជូនដំណឹង", "updated": "បានកែប្រែការជូនដំណឹង", "deleted": "បានលុបការជូនដំណឹង", "missingId": "មិនអាចលុបការជូនដំណឹងនេះបានទេ ព្រោះគ្មានលេខសម្គាល់។" },
+    "confirmDelete": { "title": "លុបការជូនដំណឹង", "message": "លុបការជូនដំណឹង \"{title}\"?" }
   },
   "notificationTypes": {
     "title": "ប្រភេទការជូនដំណឹង",
