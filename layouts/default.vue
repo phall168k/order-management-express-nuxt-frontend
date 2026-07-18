@@ -85,13 +85,15 @@
             <button
               class="relative grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
               type="button"
-              aria-label="Cart"
+              :aria-label="$t('notificationDrawer.open')"
+              @click="openNotificationDrawer"
             >
-              <Icon name="solar:bell-outline" class="h-5 w-5" />
+              <Icon name="mingcute:notification-line" class="h-5 w-5" />
               <span
+                v-if="unreadNotificationCount"
                 class="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-rose-600 px-1 text-[10px] font-bold leading-none text-white"
               >
-                10
+                {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
               </span>
             </button>
             <el-dropdown trigger="click" @command="handleAccountCommand">
@@ -221,6 +223,48 @@
           <div class="flex items-center justify-between text-sm">
             <span class="font-medium text-slate-600">{{ $t('cartDrawer.total') }}</span>
             <span class="text-lg font-bold text-slate-950">{{ formatCartPrice(cartTotal) }}</span>
+          </div>
+        </div>
+      </div>
+    </el-drawer>
+
+    <el-drawer v-model="isNotificationDrawerVisible" :title="$t('notificationDrawer.title')" direction="rtl" size="420px">
+      <div v-loading="notificationsLoading" class="min-h-full">
+        <div v-if="receivedNotifications.length" class="space-y-3">
+          <button
+            v-for="notification in receivedNotifications"
+            :key="notification._id || notification.id"
+            class="flex w-full gap-3 rounded-lg border p-4 text-left transition hover:border-emerald-300"
+            :class="notification.isSeen === false ? 'border-emerald-300 bg-emerald-50/70 shadow-sm' : 'border-slate-200 bg-white hover:bg-slate-50'"
+            type="button"
+            @click="openNotification(notification)"
+          >
+            <span
+              class="grid h-10 w-10 shrink-0 place-items-center rounded-lg"
+              :class="notification.isSeen === false ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'"
+            >
+              <Icon :name="notification.notificationType?.icon || 'lucide:bell'" class="h-5 w-5" />
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="flex items-start justify-between gap-3">
+                <span class="truncate text-sm text-slate-950" :class="notification.isSeen === false ? 'font-bold' : 'font-medium'">{{ notification.title }}</span>
+                <span v-if="notification.isSeen === false" class="mt-1 h-2 w-2 shrink-0 rounded-full bg-emerald-600" />
+              </span>
+              <span class="mt-1 block text-sm leading-5 text-slate-600">{{ notification.subject }}</span>
+              <span class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-400">
+                <span>{{ getNotificationSenderLabel(notification) }}</span>
+                <span aria-hidden="true">·</span>
+                <span>{{ formatNotificationDate(notification.createdAt) }}</span>
+              </span>
+            </span>
+          </button>
+        </div>
+
+        <div v-else-if="!notificationsLoading" class="grid min-h-72 place-items-center rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+          <div>
+            <Icon name="lucide:bell-off" class="mx-auto h-10 w-10 text-slate-300" />
+            <h3 class="mt-3 text-base font-semibold text-slate-950">{{ $t('notificationDrawer.emptyTitle') }}</h3>
+            <p class="mt-1 text-sm text-slate-500">{{ $t('notificationDrawer.emptyDescription') }}</p>
           </div>
         </div>
       </div>
@@ -499,7 +543,7 @@ import type { PickedOrder, PickedProduct, PickedProductThumbnail } from '~/compo
 
 const route = useRoute()
 const router = useRouter()
-const { locale, setLocale } = useI18n()
+const { t, locale, setLocale } = useI18n()
 const config = useRuntimeConfig()
 const authToken = useCookie<string | null>('auth_token')
 const { user, isAuthenticated, setAuth, clearAuth } = useAuth()
@@ -639,11 +683,37 @@ type SaleHistoryResponse = SaleHistory[] | {
   pagination?: { total?: number; page?: number; limit?: number; totalPages?: number }
 }
 
+type ReceivedNotification = {
+  _id?: string
+  id?: string
+  title: string
+  subject: string
+  sender?: { _id?: string; id?: string; email?: string; username?: string }
+  reciever?: { _id?: string; id?: string; email?: string; username?: string }
+  notificationType?: { _id?: string; id?: string; name?: string; icon?: string }
+  link?: string
+  isSeen?: boolean
+  createdAt?: string
+  updatedAt?: string
+}
+
+type ReceivedNotificationResponse = ReceivedNotification[] | {
+  data?: ReceivedNotification[] | { notifications?: ReceivedNotification[]; items?: ReceivedNotification[]; docs?: ReceivedNotification[] }
+  notifications?: ReceivedNotification[]
+  items?: ReceivedNotification[]
+  docs?: ReceivedNotification[]
+  pagination?: { total?: number; page?: number; limit?: number; totalPages?: number }
+}
+
 const minioBucketPathPattern = /\/order-management\/(.+?)(?:\?.*)?$/
 const isProfileViewVisible = ref(false)
 const isProfileEditVisible = ref(false)
 const isPasswordDialogVisible = ref(false)
 const isCartDrawerVisible = ref(false)
+const isNotificationDrawerVisible = ref(false)
+const notificationsLoading = ref(false)
+const receivedNotifications = ref<ReceivedNotification[]>([])
+const unreadNotificationCount = computed(() => receivedNotifications.value.filter(notification => notification.isSeen === false).length)
 const isOrderHistoryVisible = ref(false)
 const orderHistoryLoading = ref(false)
 const orderHistory = ref<SaleHistory[]>([])
@@ -970,6 +1040,65 @@ const openCartDrawer = async () => {
   }
 }
 
+const extractReceivedNotifications = (response: ReceivedNotificationResponse): ReceivedNotification[] => {
+  if (Array.isArray(response)) return response
+  if (Array.isArray(response.data)) return response.data
+  if (Array.isArray(response.data?.notifications)) return response.data.notifications
+  if (Array.isArray(response.data?.items)) return response.data.items
+  if (Array.isArray(response.data?.docs)) return response.data.docs
+  if (Array.isArray(response.notifications)) return response.notifications
+  if (Array.isArray(response.items)) return response.items
+  if (Array.isArray(response.docs)) return response.docs
+  return []
+}
+
+const fetchReceivedNotifications = async () => {
+  if (!isAuthenticated.value || notificationsLoading.value) return
+  notificationsLoading.value = true
+
+  try {
+    const response = await $fetch<ReceivedNotificationResponse>(`${apiBaseUrl.value}/system/notifications/received`, {
+      headers: requestHeaders.value,
+      query: { page: 1, limit: 100 }
+    })
+    receivedNotifications.value = extractReceivedNotifications(response)
+  } catch (error) {
+    ElMessage.error(getErrorMessage(error, t('notificationDrawer.loadError')))
+  } finally {
+    notificationsLoading.value = false
+  }
+}
+
+const openNotificationDrawer = async () => {
+  if (!isAuthenticated.value) {
+    await navigateTo('/auth/login')
+    return
+  }
+
+  isNotificationDrawerVisible.value = true
+  await fetchReceivedNotifications()
+}
+
+const getNotificationSenderLabel = (notification: ReceivedNotification) => {
+  return notification.sender?.username || notification.sender?.email || '—'
+}
+
+const formatNotificationDate = (value?: string) => value
+  ? new Intl.DateTimeFormat(locale.value === 'km' ? 'km-KH' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+  : '—'
+
+const openNotification = async (notification: ReceivedNotification) => {
+  if (!notification.link) return
+  isNotificationDrawerVisible.value = false
+
+  if (/^https?:\/\//i.test(notification.link)) {
+    await navigateTo(notification.link, { external: true })
+    return
+  }
+
+  await navigateTo(notification.link)
+}
+
 const updateCartQuantity = async (order: PickedOrder, quantity: number) => {
   try {
     await updatePickedQuantity(order, quantity)
@@ -1288,10 +1417,13 @@ watch(
   (value) => {
     if (value) {
       fetchPickedProducts().then(loadCartProductImages).catch(console.error)
+      fetchReceivedNotifications().catch(console.error)
       return
     }
 
     pickedProducts.value = []
+    receivedNotifications.value = []
+    isNotificationDrawerVisible.value = false
   },
   { immediate: true }
 )

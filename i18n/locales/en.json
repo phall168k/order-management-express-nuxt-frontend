@@ -37,6 +37,13 @@
     "emptyDescription": "Click a product to add it here.",
     "total": "Total"
   },
+  "notificationDrawer": {
+    "open": "Open notifications",
+    "title": "Notifications",
+    "emptyTitle": "No notifications",
+    "emptyDescription": "Your received notifications will appear here.",
+    "loadError": "Failed to load notifications."
+  },
   "account": {
     "menu": "Account menu",
     "profile": "User profiles",
